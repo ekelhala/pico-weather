@@ -17,6 +17,7 @@ if(DEFINED ENABLE_USB)
         endif()
 else()
         pico_enable_stdio_usb(main 0)
+        pico_enable_stdio_uart(main 1)
 endif()
 
 target_compile_definitions(main PRIVATE
@@ -40,4 +41,15 @@ target_compile_options( main PUBLIC
         $<$<COMPILE_LANG_AND_ID:C,Clang>:-Weverything>
         )
 
-target_link_libraries(main pico_stdlib FreeRTOS-Kernel FreeRTOS-Kernel-Heap4)
+target_compile_definitions( main PRIVATE
+                                WIFI_SSID=\"${WIFI_SSID}\"
+                                WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+                                NO_SYS=0)
+
+target_link_libraries(main
+                        pico_stdlib 
+                        pico_cyw43_arch_lwip_sys_freertos
+                        pico_lwip_mbedtls
+                        pico_mbedtls
+                        pico_lwip_mqtt
+                        FreeRTOS-Kernel-Heap4)
