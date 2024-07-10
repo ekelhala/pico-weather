@@ -101,4 +101,6 @@
 #define LWIP_SO_RCVTIMEO 1
 #endif
 
+#define MEMP_NUM_SYS_TIMEOUT (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 1)
+
 #endif /* __LWIPOPTS_H__ */

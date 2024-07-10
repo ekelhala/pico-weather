@@ -42,8 +42,6 @@ target_compile_options( main PUBLIC
         )
 
 target_compile_definitions( main PRIVATE
-                                WIFI_SSID=\"${WIFI_SSID}\"
-                                WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
                                 NO_SYS=0)
 
 target_link_libraries(main

@@ -1,2 +1,3 @@
 build/
 **/cmake-*/
+config/env.h
