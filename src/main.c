@@ -12,6 +12,7 @@
 
 void publish_task(void *pvParams);
 void network_task(void *pvParams);
+
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
 
@@ -62,7 +63,7 @@ void publish_task(void *pvParams) {
                 mqtt_publish(client, TEMPERATURE_TOPIC, temperature_value, strlen(temperature_value), 2, 0, mqtt_published_cb, NULL);
                 cyw43_arch_lwip_end();
             }
-            vTaskDelay(10000 / portTICK_PERIOD_MS);
+            vTaskDelay(1500 / portTICK_PERIOD_MS);
         }
 }
 
