@@ -59,9 +59,7 @@ void publish_task(void *pvParams) {
                 char temperature_value[4];
                 sprintf(&temperature_value, "%d", temperature);
                 
-                cyw43_arch_lwip_begin();
                 mqtt_publish(client, TEMPERATURE_TOPIC, temperature_value, strlen(temperature_value), 2, 0, mqtt_published_cb, NULL);
-                cyw43_arch_lwip_end();
             }
             vTaskDelay(1500 / portTICK_PERIOD_MS);
         }
@@ -77,16 +75,13 @@ void network_task(void *pvParameters) {
             printf("Failed to connect\n");
         }
         printf("Connected!\n");
-        cyw43_arch_lwip_begin();    
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
         client = mqtt_client_new();
-        cyw43_arch_lwip_end();
         ip_addr_t server_ip;
         ipaddr_aton(MQTT_SERVER_ADDR, &server_ip);
         while(true) {
             if(!is_connected) {
-                cyw43_arch_lwip_begin();
                 mqtt_client_connect(client, &server_ip, MQTT_SERVER_PORT, mqtt_connect_cb, NULL, &client_info);
-                cyw43_arch_lwip_end();
             }
             vTaskDelay(500 / portTICK_PERIOD_MS);
         }
