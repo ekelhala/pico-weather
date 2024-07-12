@@ -9,4 +9,4 @@ picotool load nothing -F > /dev/null
 echo "Putting the device into BOOTSEL..."
 sleep 2
 # Now we are for sure in BOOTSEL, load program and restart
-picotool load -x ./build/src/main.elf
+picotool load -x ./build/main.elf
