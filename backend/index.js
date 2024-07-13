@@ -5,14 +5,20 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.port || 8000;
 
+const UNIT_CELSIUS = "celsius"
+
 const dataModel = [
     {
         topic: "device/temperature",
         value: -1,
+        unit: UNIT_CELSIUS,
+        lastUpdated: Date.now()
     },
     {
         topic: "sensors/temperature_out",
         value: -1,
+        unit: UNIT_CELSIUS,
+        lastUpdated: Date.now()
     }
 ]
 
@@ -35,6 +41,7 @@ mqttClient.on("message", (topic, payload, packet) => {
     for(let dataIdx in dataModel) {
         if(dataModel[dataIdx].topic == topic) {
             dataModel[dataIdx].value = payload.toString();
+            dataModel[dataIdx].lastUpdated = Date.now();
         }
     }
 })
@@ -44,7 +51,7 @@ app.get("*", (req, res) => {
     let found = false;
     dataModel.forEach(data => {
         if(data.topic == topicURI) {
-            res.json({value: data.value});
+            res.json(serializeData(data));
             found = true;
         }
     })
@@ -52,6 +59,12 @@ app.get("*", (req, res) => {
         res.status(404).json({error: "Data not found"});
     }
 })
+
+const serializeData = (data) => {
+    let dataInst = structuredClone(data);
+    delete dataInst.topic
+    return dataInst;
+}
 
 app.listen(PORT, () => {
     console.log("Server running in port %d", PORT);
