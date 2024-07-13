@@ -36,6 +36,9 @@ export default function Home() {
       </ul>
       <DeviceTemperature data={data.deviceTemperature}
       getData={getData}/>
+      <footer style={{position: 'absolute', bottom:'0'}}>
+      <small>Check it out on <a href="https://github.com/ekelhala/pico-weather">Github</a>!</small>
+      </footer>
     </>
   );
 }
