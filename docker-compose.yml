@@ -12,3 +12,8 @@ services:
     container_name: pico-weather-frontend
     build:
       context: frontend
+  proxy:
+    network_mode: host
+    container_name: pico-weather-proxy
+    build:
+      context: proxy

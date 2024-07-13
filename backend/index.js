@@ -43,8 +43,8 @@ mqttClient.on("message", (topic, payload, packet) => {
     }
 })
 
-app.get("*", (req, res) => {
-    const topicURI = req.url.slice(1);
+app.get("/api/*", (req, res) => {
+    const topicURI = req.url.slice(5);
     let found = false;
     dataModel.forEach(data => {
         if(data.topic == topicURI) {

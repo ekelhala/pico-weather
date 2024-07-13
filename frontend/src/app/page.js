@@ -5,7 +5,7 @@ import DeviceTemperature from "@/app/components/DeviceTemperature";
 
 export default function Home() {
 
-  const SERVER_URL = "http://localhost:8000"
+  const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
   const [data, setData] = useState({
     deviceTemperature:{},
@@ -20,7 +20,7 @@ export default function Home() {
   },[])
 
   const getData = async (uri) => {
-    const freshData = (await axios.get(`${SERVER_URL}/${uri}`)).data;
+    const freshData = (await axios.get(`${API_URL}/${uri}`)).data;
     switch(uri) {
       case 'device/temperature':
         setData({...data, deviceTemperature: freshData});
