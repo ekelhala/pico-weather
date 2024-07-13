@@ -13,4 +13,4 @@ The plan is to create a weather station program for Pico W, which sends data to 
 ## Project structure
 
 * `pico` - contains the weather station software for Pico W
-* `backend` - contains the backend Node.js server
+* `backend` - contains the backend Express server
