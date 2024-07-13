@@ -62,7 +62,7 @@ export default function Home() {
         </Container>
       </Navbar>
       <Container fluid>
-      <Row xs={2} md={2} lg={2}>
+      <Row xs={1} md={2} lg={2}>
       {data.map(dataItem => {
         return(
         <Col key={dataItem.topic}> 
