@@ -10,6 +10,7 @@ A weather station for Pico W. It uses MQTT to send sensor data from the Pico to 
 - Display data in a web page, formatted appropriately ✅ (only one source currently)
 - Improve documentation
 - Dockerize ✅
+- Add more sensors
 
 ## Project structure
 
