@@ -7,15 +7,16 @@ A weather station for Pico W. It uses MQTT to send sensor data from the Pico to 
 - Establish connection with server ✅
 - Collect sensor data periodically ✅ (only one source currently)
 - Send data to server ✅
-- Display data in a web page, formatted appropriately ✅
+- Display data in a web page, formatted appropriately ✅ (only one source currently)
 - Improve documentation
-- Dockerize
+- Dockerize ✅
 
 ## Project structure
 
 * `pico` - contains the weather station software for Pico W
 * `backend` - contains the backend Express server
 * `frontend` - contains the React applicationto view data
+* `proxy` - nginx proxy to be used in deployment
 
 ## Usage
 
