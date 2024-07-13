@@ -23,4 +23,4 @@ A weather station for Pico W. It uses MQTT to send sensor data from the Pico to 
 
 You will need Docker, and docker-compose. The application can be deployed to a server by simply cloning this repository, entering the directory, and running `docker compose up`.
 
-MQTT Broker is not included in the deployment, so it needs to be set up separately. [msoquitto]() is a good choice for this. The address, port and credentials for the server need to be also included to the environment variable files in `backend/.env` and `pico/config/.env.h`
+MQTT Broker is not included in the deployment, so it needs to be set up separately. [mosquitto](https://mosquitto.org/) is a good choice for this. The address, port and credentials for the server need to be also included to the environment variable files in `backend/.env` and `pico/config/env.h`
