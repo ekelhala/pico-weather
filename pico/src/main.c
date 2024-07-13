@@ -19,8 +19,15 @@ void device_temp_task(__unused void *pvParams);
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
 
-#define TEMPERATURE_OUT_TOPIC "sensors/temperature_out"
 #define TEMPERATURE_DEVICE_TOPIC "device/temperature"
+
+#define MINUTE 60*1000
+
+#define TEMPERATURE_DEVICE_MEAS_DELAY 2*MINUTE
+
+#define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
+
+#define NETWORK_CHECK_DELAY 30*1000
 
 static const struct mqtt_connect_client_info_t client_info = {
     "weather-station-1",
@@ -70,7 +77,7 @@ void publish_task(__unused void *pvParams) {
                 sprintf(&temperature_value, "%.2f", app_state.device_temp);
                 mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
             }
-            vTaskDelay(10000 / portTICK_PERIOD_MS);
+            vTaskDelay(PUBLISH_DELAY / portTICK_PERIOD_MS);
         }
 }
 
@@ -90,7 +97,7 @@ void network_task(__unused void *pvParameters) {
             if(!app_state.is_connected) {
                 mqtt_client_connect(client, &server_ip, MQTT_SERVER_PORT, mqtt_connect_cb, NULL, &client_info);
             }
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            vTaskDelay(NETWORK_CHECK_DELAY / portTICK_PERIOD_MS);
         }
 }
 
@@ -107,7 +114,7 @@ void device_temp_task(__unused void *pvParams) {
     adc_select_input(4);
     while(true) {
         app_state.device_temp = read_device_temp();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(TEMPERATURE_DEVICE_MEAS_DELAY / portTICK_PERIOD_MS);
     }
 }
 
