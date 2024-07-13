@@ -15,7 +15,6 @@ export default function Home() {
   useEffect(() => {
     const getStartData = async () => {
       await getData('device/temperature')
-      await getData('sensors/temperature_out')
     }
     getStartData();
   },[])

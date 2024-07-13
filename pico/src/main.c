@@ -36,12 +36,10 @@ static mqtt_client_t* client;
 
 struct application_state {
     float device_temp;
+    bool is_connected;
 };
 
 struct application_state app_state;
-
-bool is_connected = false;
-int temperature = 25;
 
 int main() {
     stdio_init_all();
@@ -54,10 +52,10 @@ int main() {
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
     if(status == MQTT_CONNECT_ACCEPTED) {
-        is_connected = true;
+        app_state.is_connected = true;
     }
     if(status == MQTT_CONNECT_DISCONNECTED) {
-        is_connected = false;
+        app_state.is_connected = false;
     }
     else {
         printf("MQTT connection error\n");
@@ -66,12 +64,8 @@ void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t 
 
 void publish_task(__unused void *pvParams) {
         while(true) {
-            if(is_connected) {
+            if(app_state.is_connected) {
                 char temperature_value[4];
-                // Publish test temperature value
-                sprintf(&temperature_value, "%.2f", temperature);
-                mqtt_publish(client, TEMPERATURE_OUT_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
-
                 // Publish device temperature
                 sprintf(&temperature_value, "%.2f", app_state.device_temp);
                 mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
@@ -84,18 +78,16 @@ void network_task(__unused void *pvParameters) {
         if(cyw43_arch_init()) {
             printf("Init failed!\n");
         }
-        printf("init done!\n");
         cyw43_arch_enable_sta_mode();
         if(cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK)) {
             printf("Failed to connect\n");
         }
-        printf("Connected!\n");
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
         client = mqtt_client_new();
         ip_addr_t server_ip;
         ipaddr_aton(MQTT_SERVER_ADDR, &server_ip);
         while(true) {
-            if(!is_connected) {
+            if(!app_state.is_connected) {
                 mqtt_client_connect(client, &server_ip, MQTT_SERVER_PORT, mqtt_connect_cb, NULL, &client_info);
             }
             vTaskDelay(1000 / portTICK_PERIOD_MS);

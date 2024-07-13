@@ -16,12 +16,6 @@ const dataModel = [
         value: -1,
         unit: UNIT_CELSIUS,
         lastUpdated: Date.now()
-    },
-    {
-        topic: "sensors/temperature_out",
-        value: -1,
-        unit: UNIT_CELSIUS,
-        lastUpdated: Date.now()
     }
 ]
 
