@@ -15,9 +15,11 @@ A weather station for Pico W. It uses MQTT to send sensor data from the Pico to 
 
 * `pico` - contains the weather station software for Pico W
 * `backend` - contains the backend Express server
-* `frontend` - contains the React applicationto view data
+* `frontend` - contains the React application to view data
 * `proxy` - nginx proxy to be used in deployment
 
-## Usage
+## Deployment
 
-Right now the different components need to be deployed separately. You also need an MQTT Broker, to which the backend service and Pico connect to exchange data.
+You will need Docker, and docker-compose. The application can be deployed to a server by simply cloning this repository, entering the directory, and running `docker compose up`.
+
+MQTT Broker is not included in the deployment, so it needs to be set up separately. [msoquitto]() is a good choice for this. The address, port and credentials for the server need to be also included to the environment variable files in `backend/.env` and `pico/config/.env.h`
