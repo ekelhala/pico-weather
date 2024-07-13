@@ -12,8 +12,8 @@
 
 #include "env.h"
 
-void publish_task(void *pvParams);
-void network_task(void *pvParams);
+void publish_task(__unused void *pvParams);
+void network_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
@@ -64,23 +64,23 @@ void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t 
     }
 }
 
-void publish_task(void *pvParams) {
+void publish_task(__unused void *pvParams) {
         while(true) {
             if(is_connected) {
                 char temperature_value[4];
                 // Publish test temperature value
-                sprintf(&temperature_value, "%.2f C", temperature);
+                sprintf(&temperature_value, "%.2f", temperature);
                 mqtt_publish(client, TEMPERATURE_OUT_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
 
                 // Publish device temperature
                 sprintf(&temperature_value, "%.2f", app_state.device_temp);
                 mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
             }
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            vTaskDelay(10000 / portTICK_PERIOD_MS);
         }
 }
 
-void network_task(void *pvParameters) {
+void network_task(__unused void *pvParameters) {
         if(cyw43_arch_init()) {
             printf("Init failed!\n");
         }
@@ -98,7 +98,7 @@ void network_task(void *pvParameters) {
             if(!is_connected) {
                 mqtt_client_connect(client, &server_ip, MQTT_SERVER_PORT, mqtt_connect_cb, NULL, &client_info);
             }
-            vTaskDelay(500 / portTICK_PERIOD_MS);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
 }
 
