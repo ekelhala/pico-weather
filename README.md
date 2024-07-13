@@ -10,6 +10,7 @@ The plan is to create a weather station program for Pico W, which sends data to 
 - Recover from errors
 - Display data in a web page, formatted appropriately
 - Improve documentation
+- Dockerize
 
 ## Project structure
 
