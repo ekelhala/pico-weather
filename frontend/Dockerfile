@@ -9,7 +9,6 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -u 1001 -S nextjs
 RUN chown nextjs:nodejs .next
-ENV PORT 80
-EXPOSE 80
+ENV PORT 3000
 USER nextjs
 CMD ["npm", "start"]

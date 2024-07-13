@@ -8,8 +8,8 @@ services:
     build:
       context: backend
   frontend:
-    network_mode: host
     container_name: pico-weather-frontend
     build:
       context: frontend
-    
+    ports:
+      - "80:3000"
