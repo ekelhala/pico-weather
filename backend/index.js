@@ -48,7 +48,7 @@ app.get("/api/*", (req, res) => {
     let found = false;
     dataModel.forEach(data => {
         if(data.topic == topicURI) {
-            res.json(serializeData(data));
+            res.json(data);
             found = true;
         }
     })
@@ -56,12 +56,6 @@ app.get("/api/*", (req, res) => {
         res.status(404).json({error: "Data not found"});
     }
 })
-
-const serializeData = (data) => {
-    let dataInst = structuredClone(data);
-    delete dataInst.topic
-    return dataInst;
-}
 
 app.listen(PORT, () => {
     console.log("Server running in port %d", PORT);
