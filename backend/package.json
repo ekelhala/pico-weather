@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Node.js backend for the Pico W weather station",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "iot",
+    "pico",
+    "mqtt"
+  ],
+  "author": "Emil Kelhälä",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^5.8.0"
+  }
+}
