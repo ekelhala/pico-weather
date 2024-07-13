@@ -32,7 +32,6 @@ export default function Home() {
   return (
     <>
       <h2>pico-weather</h2>
-      <p>Data</p>
       <ul>
         <li><a href="#device-temperature">Device temperature</a></li>
       </ul>
