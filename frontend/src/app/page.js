@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DataCard from "./components/DataCard";
-import { Button, Col, Container, Navbar, Row } from "react-bootstrap";
-import { BsArrowCounterclockwise } from "react-icons/bs";
+import { Button, Col, Container, Navbar, Row, Stack } from "react-bootstrap";
+import { BsArrowCounterclockwise, BsGithub } from "react-icons/bs";
 
 export default function Home() {
 
@@ -78,7 +78,7 @@ export default function Home() {
       </Row>
       </Container>
       <footer style={{position: 'absolute', bottom:'0'}}>
-      <small>Check it out on <a href="https://github.com/ekelhala/pico-weather">Github</a>!</small>
+      <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
       </footer>
     </>
   );
