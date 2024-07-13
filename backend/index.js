@@ -1,9 +1,12 @@
 const MQTT = require('mqtt');
 const express = require('express');
 require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.port || 8000;
+
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}))
 
 const UNIT_CELSIUS = "celsius"
 
