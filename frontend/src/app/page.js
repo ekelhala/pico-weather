@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DeviceTemperature from "@/app/components/DeviceTemperature";
-axios.defaults.withCredentials = true;
+
 export default function Home() {
 
   const SERVER_URL = "http://localhost:8000"

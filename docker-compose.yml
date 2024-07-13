@@ -1,0 +1,19 @@
+services:
+  backend:
+    network_mode: host
+    container_name: pico-weather-backend
+    env_file:
+      - path: backend/.env
+        required: true
+    ports:
+      - 8000:8000
+    build:
+      context: backend
+  frontend:
+    network_mode: host
+    container_name: pico-weather-frontend
+    ports:
+      - 80:3000
+    build:
+      context: frontend
+    
