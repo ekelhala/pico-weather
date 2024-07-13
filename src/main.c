@@ -1,5 +1,7 @@
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
+#include <hardware/adc.h>
+
 #include <inttypes.h>
 #include <stdio.h>
 #include <FreeRTOS.h>
@@ -12,11 +14,13 @@
 
 void publish_task(void *pvParams);
 void network_task(void *pvParams);
+void device_temp_task(__unused void *pvParams);
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
 
-#define TEMPERATURE_TOPIC "sensors/temperature"
+#define TEMPERATURE_OUT_TOPIC "sensors/temperature_out"
+#define TEMPERATURE_DEVICE_TOPIC "device/temperature"
 
 static const struct mqtt_connect_client_info_t client_info = {
     "weather-station-1",
@@ -30,6 +34,12 @@ static const struct mqtt_connect_client_info_t client_info = {
 };
 static mqtt_client_t* client;
 
+struct application_state {
+    float device_temp;
+};
+
+struct application_state app_state;
+
 bool is_connected = false;
 int temperature = 25;
 
@@ -37,6 +47,7 @@ int main() {
     stdio_init_all();
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(network_task, "NETWORK_TASK", 2048, NULL, 1, NULL);
+    xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
 }
@@ -57,11 +68,15 @@ void publish_task(void *pvParams) {
         while(true) {
             if(is_connected) {
                 char temperature_value[4];
-                sprintf(&temperature_value, "%d", temperature);
-                
-                mqtt_publish(client, TEMPERATURE_TOPIC, temperature_value, strlen(temperature_value), 2, 0, mqtt_published_cb, NULL);
+                // Publish test temperature value
+                sprintf(&temperature_value, "%.2f C", temperature);
+                mqtt_publish(client, TEMPERATURE_OUT_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
+
+                // Publish device temperature
+                sprintf(&temperature_value, "%.2f", app_state.device_temp);
+                mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
             }
-            vTaskDelay(1500 / portTICK_PERIOD_MS);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
 }
 
@@ -85,6 +100,23 @@ void network_task(void *pvParameters) {
             }
             vTaskDelay(500 / portTICK_PERIOD_MS);
         }
+}
+
+static float read_device_temp() {
+    const float conversionFactor = 3.3f / (1 << 12);
+    float adc = (float)adc_read() * conversionFactor;
+    return 27.0f - (adc - 0.706f) / 0.001721f;
+}
+
+void device_temp_task(__unused void *pvParams) {
+    // Initialize ADC
+    adc_init();
+    adc_set_temp_sensor_enabled(true);
+    adc_select_input(4);
+    while(true) {
+        app_state.device_temp = read_device_temp();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }
 
 void mqtt_published_cb(void *arg, err_t error) {

@@ -58,4 +58,5 @@ target_link_libraries(main
                         pico_lwip_mbedtls
                         pico_mbedtls
                         pico_lwip_mqtt
-                        FreeRTOS-Kernel-Heap4)
+                        FreeRTOS-Kernel-Heap4
+                        hardware_adc)
