@@ -14,17 +14,22 @@
 
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
+void process_data_task(__unused void *pvParams);
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
 
 #define TEMPERATURE_DEVICE_TOPIC "device/temperature"
 
-#define MINUTE 60*1000
+#define SECOND 1000
+#define MINUTE 60*SECOND
 
-#define TEMPERATURE_DEVICE_MEAS_DELAY 2*MINUTE
+#define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
 
 #define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
+
+#define PROCESS_DELAY 10*SECOND
+#define TEMPERATURE_DEVICE_AVERAGE_WINDOW 10
 
 
 static const struct mqtt_connect_client_info_t client_info = {
@@ -39,6 +44,15 @@ static const struct mqtt_connect_client_info_t client_info = {
 };
 static mqtt_client_t* client;
 
+// A struct holding data readings from sensors etc...
+struct application_data {
+    float device_temp_readings[TEMPERATURE_DEVICE_AVERAGE_WINDOW];
+    float device_temp_average;
+    int device_temp_readings_index;
+};
+
+struct application_data app_data;
+
 struct application_state {
     float device_temp;
     bool is_connected;
@@ -51,6 +65,7 @@ int main() {
     stdio_init_all();
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(process_data_task, "PROCESS_DATA_TASK", 512, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
 }
@@ -80,6 +95,8 @@ void publish_task(__unused void *pvParams) {
     ip_addr_t ip;
     ipaddr_aton(MQTT_SERVER_ADDR, &ip);
     app_state.server_ip = ip;
+    // Wait so that we don't publish unprocessed values
+    vTaskDelay(PUBLISH_DELAY / portTICK_PERIOD_MS);
     while(true) {
         err_t connect;
         // Indicate that we are connecting
@@ -125,8 +142,26 @@ void device_temp_task(__unused void *pvParams) {
     adc_set_temp_sensor_enabled(true);
     adc_select_input(4);
     while(true) {
-        app_state.device_temp = read_device_temp();
+        int index = app_data.device_temp_readings_index;
+        if(index == TEMPERATURE_DEVICE_AVERAGE_WINDOW-1) {
+            index = 0;
+            app_data.device_temp_readings_index = 0;
+        }
+        app_data.device_temp_readings[index] = read_device_temp();
+        app_data.device_temp_readings_index++;
         vTaskDelay(TEMPERATURE_DEVICE_MEAS_DELAY / portTICK_PERIOD_MS);
+    }
+}
+
+void process_data_task(__unused void *pvParams) {
+    while(true) {
+        // Calculating average of chip temperatures
+        float sum = 0;
+        for(int i=0; i<TEMPERATURE_DEVICE_AVERAGE_WINDOW; i++) {
+            sum += app_data.device_temp_readings[i];
+        }
+        app_state.device_temp = sum / TEMPERATURE_DEVICE_AVERAGE_WINDOW;
+        vTaskDelay(PROCESS_DELAY / portTICK_PERIOD_MS);
     }
 }
 
