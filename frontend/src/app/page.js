@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DataCard from "./components/DataCard";
-import { Button, Col, Container, Navbar, Row, Stack } from "react-bootstrap";
-import { BsArrowCounterclockwise, BsGithub } from "react-icons/bs";
+import { Button, Card, Col, Container, Navbar, Row, Stack } from "react-bootstrap";
+import { BsArrowCounterclockwise, BsCpu, BsCpuFill, BsGeoAlt, BsGithub, BsMarkdown } from "react-icons/bs";
 
 export default function Home() {
 
@@ -61,6 +61,22 @@ export default function Home() {
           </div>
         </Container>
       </Navbar>
+      <Container fluid className="my-2">
+        <Card>
+          <Card.Header>This Station</Card.Header>
+          <Card.Body>
+            <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '5px'}}>
+              <li><Stack gap={2} direction="horizontal">
+                <BsGeoAlt/> 
+                Location: {process.env.STATION_LOCATION ? process.env.STATION_LOCATION : "Not specified"}
+                </Stack></li>
+              <li><Stack gap={2} direction="horizontal">
+                <BsCpu/> 
+                Hardware: {process.env.STATION_HARDWARE ? process.env.STATION_LOCATION : "Not specified"}</Stack></li>
+            </ul>
+          </Card.Body>  
+        </Card>    
+      </Container>
       <Container fluid>
       <Row xs={1} md={2} lg={2}>
       {data.map(dataItem => {
