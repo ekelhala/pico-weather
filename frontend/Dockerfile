@@ -1,6 +1,11 @@
 FROM node:18-alpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+# Set station information here!
+# ENV NEXT_PUBLIC_STATION_LOCATION=""
+# ENV NEXT_PUBLIC_STATION_HARDWARE=""
+# ENV NEXT_PUBLIC_STATION_CONTACT=""
+
 COPY package*.json ./
 RUN npm install
 COPY . .

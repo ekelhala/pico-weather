@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import DataCard from "./components/DataCard";
 import { Button, Card, Col, Container, Navbar, Row, Stack } from "react-bootstrap";
-import { BsArrowCounterclockwise, BsCpu, BsCpuFill, BsGeoAlt, BsGithub, BsMarkdown } from "react-icons/bs";
+import { BsArrowCounterclockwise, BsAt, BsCpu, BsGeoAlt, BsGithub } from "react-icons/bs";
 
 export default function Home() {
 
@@ -55,7 +55,7 @@ export default function Home() {
         <Container fluid>
           <div style={{display: "flex", width: "100%", justifyContent:"space-between"}}>
             <Navbar.Brand>Dashboard</Navbar.Brand>
-            <Button variant="outline-light" onClick={async () => updateAll()}>
+            <Button variant="outline-light" style={{borderRadius:'15px'}} onClick={async () => updateAll()}>
               <BsArrowCounterclockwise size="1.2em"/>
             </Button>
           </div>
@@ -65,14 +65,19 @@ export default function Home() {
         <Card>
           <Card.Header>This Station</Card.Header>
           <Card.Body>
-            <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '5px'}}>
+            <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '10px'}}>
               <li><Stack gap={2} direction="horizontal">
-                <BsGeoAlt/> 
-                Location: {process.env.STATION_LOCATION ? process.env.STATION_LOCATION : "Not specified"}
+                <BsGeoAlt size="1.2em"/> 
+                Location: {process.env.NEXT_PUBLIC_STATION_LOCATION ? process.env.NEXT_PUBLIC_STATION_LOCATION : "Not specified"}
                 </Stack></li>
               <li><Stack gap={2} direction="horizontal">
-                <BsCpu/> 
-                Hardware: {process.env.STATION_HARDWARE ? process.env.STATION_LOCATION : "Not specified"}</Stack></li>
+                <BsCpu size="1.2em"/> 
+                Hardware: {process.env.NEXT_PUBLIC_STATION_HARDWARE ? process.env.NEXT_PUBLIC_STATION_HARDWARE : "Not specified"}
+                </Stack></li>
+              <li><Stack gap={2} direction="horizontal">
+                <BsAt size="1.2em"/>
+                Contact: {process.env.NEXT_PUBLIC_STATION_CONTACT ? process.env.NEXT_PUBLIC_STATION_CONTACT : "Not specified"}
+                </Stack></li>
             </ul>
           </Card.Body>  
         </Card>    
