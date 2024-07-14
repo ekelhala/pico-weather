@@ -72,22 +72,20 @@ void publish_task(__unused void *pvParams) {
     if(cyw43_arch_init()) {
         printf("Init failed!\n");
     }
+    cyw43_arch_enable_sta_mode();
+    if(cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK)) {
+        printf("Failed to connect\n");
+    }
     client = mqtt_client_new();
     ip_addr_t ip;
     ipaddr_aton(MQTT_SERVER_ADDR, &ip);
     app_state.server_ip = ip;
     while(true) {
         err_t connect;
-        bool skip;
+        // Indicate that we are connecting
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
         if(!app_state.is_connected) {
-            // Enable the wireless connectivity and connect to server
-            cyw43_arch_enable_sta_mode();
-            if(cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK)) {
-                printf("Failed to connect\n");
-            }
-            // Indicate that we are connected to wifi
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
-            // Now, contact server
+            // Connect to server
             ip = app_state.server_ip;
             connect = mqtt_client_connect(client, &ip, MQTT_SERVER_PORT, mqtt_connect_cb, NULL, &client_info);
             // We might get stuck here, make sure it does not happen
@@ -109,9 +107,8 @@ void publish_task(__unused void *pvParams) {
             mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
         }
         mqtt_disconnect(client);
-        cyw43_arch_disable_sta_mode();
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, false);
         app_state.is_connected = false;
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, false);
         vTaskDelay(PUBLISH_DELAY / portTICK_PERIOD_MS);
     }
 }
