@@ -1,6 +1,7 @@
 #include <pico/cyw43_arch.h>
 #include <pico/stdlib.h>
 #include <hardware/adc.h>
+#include <hardware/i2c.h>
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -28,7 +29,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define MINUTE 60*SECOND
 
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
-#define MEASURE_DELAY SECOND
+#define MEASURE_DELAY 10*SECOND
 
 #define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
 
@@ -159,9 +160,16 @@ void device_temp_task(__unused void *pvParams) {
 }
 
 void outside_temp_task(__unused void *pvParams) {
-
     uint16_t raw_temp;
     uint16_t raw_hum;
+
+    // Initializing I2C
+    i2c_init(i2c_default, 100*1000);
+    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+
     while(1) {
         if(sht30_get_data(&raw_temp, &raw_hum)) {
             float temp_out = sht30_convert_temperature(raw_temp);

@@ -22,7 +22,7 @@
  *        -1 if I2C error occured
  */
 int sht30_get_data(uint16_t *raw_temperature, uint16_t *raw_humidity) {
-    uint8_t tx_buffer[2] = {};
+    uint8_t tx_buffer[2] = {0x2C, 0x06};
     uint8_t rx_buffer[6];
     int ret = i2c_write_blocking(i2c_default, SHT30_ADDR, tx_buffer, 2, false);
     if(ret != PICO_ERROR_GENERIC) {
@@ -30,7 +30,7 @@ int sht30_get_data(uint16_t *raw_temperature, uint16_t *raw_humidity) {
         if(ret != PICO_ERROR_GENERIC) {
             raw_temperature = (rx_buffer[0] << 8) | rx_buffer[1];
             // Skip the 3rd element, that's the checksum
-            raw_humidity = (rx_buffer[2] << 8) | rx_buffer[3];
+            raw_humidity = (rx_buffer[3] << 8) | rx_buffer[4];
             return 1;
         }
         return -1;
@@ -39,7 +39,7 @@ int sht30_get_data(uint16_t *raw_temperature, uint16_t *raw_humidity) {
 }
 
 float sht30_convert_temperature(uint16_t raw_temperature) {
-    return (-45+(175*raw_temperature)/65535.0);
+    return (-45+(175*(raw_temperature/65535.0)));
 }
 
 float sht30_convert_humidity(uint16_t raw_humidity) {
