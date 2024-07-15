@@ -15,7 +15,9 @@
  * Reads the raw temperature and humidity values from the device. These need to
  * be converted to floats. The conversion can be done by using the functions provided
  * @param raw_temperature pointer to a 16-bit integer to which temperature value will be stored
+ * 
  * @param raw_humidity pointer to a 16-bit integer to which humidity value will be stored
+ * 
  * @return 1 if values read successfully,
  *        -1 if I2C error occured
  */

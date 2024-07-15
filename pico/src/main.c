@@ -17,6 +17,7 @@
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
 void process_data_task(__unused void *pvParams);
+void outside_temp_task(__unused void* pvParams);
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
@@ -27,6 +28,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define MINUTE 60*SECOND
 
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
+#define MEASURE_DELAY SECOND
 
 #define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
 
@@ -68,6 +70,7 @@ int main() {
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
     xTaskCreate(process_data_task, "PROCESS_DATA_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(outside_temp_task, "OUTSIDE_TEMP_TASK", 512, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
 }
@@ -155,6 +158,24 @@ void device_temp_task(__unused void *pvParams) {
     }
 }
 
+void outside_temp_task(__unused void *pvParams) {
+
+    uint16_t raw_temp;
+    uint16_t raw_hum;
+    while(1) {
+        if(sht30_get_data(&raw_temp, &raw_hum)) {
+            float temp_out = sht30_convert_temperature(raw_temp);
+            float hum = sht30_convert_humidity(raw_hum);
+            printf("Outside temperature: %f\n", temp_out);
+            printf("Relative humidity: %f percent\n", hum);
+        }
+        else {
+            printf("Cannot read humidity and temperature!\n");
+        }
+        vTaskDelay(MEASURE_DELAY / portTICK_PERIOD_MS);
+    }
+}
+
 void process_data_task(__unused void *pvParams) {
     while(true) {
         // Calculating average of chip temperatures
@@ -163,9 +184,8 @@ void process_data_task(__unused void *pvParams) {
             sum += app_data.device_temp_readings[i];
         }
         app_state.device_temp = sum / TEMPERATURE_DEVICE_AVERAGE_WINDOW;
-        vTaskDelay(PROCESS_DELAY / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
 
-void mqtt_published_cb(void *arg, err_t error) {
-}
+void mqtt_published_cb(void *arg, err_t error) {}
