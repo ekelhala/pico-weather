@@ -15,7 +15,8 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 add_executable(main
-                src/main.c)
+                src/main.c
+                src/sht30.c)
 
 
 if(DEFINED ENABLE_USB)
@@ -59,4 +60,5 @@ target_link_libraries(main
                         pico_mbedtls
                         pico_lwip_mqtt
                         FreeRTOS-Kernel-Heap4
-                        hardware_adc)
+                        hardware_adc
+                        hardware_i2c)

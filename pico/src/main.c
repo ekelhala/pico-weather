@@ -12,6 +12,8 @@
 
 #include "env.h"
 
+#include <sht30.h>
+
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
 void process_data_task(__unused void *pvParams);
