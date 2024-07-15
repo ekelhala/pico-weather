@@ -9,8 +9,21 @@ const PORT = process.env.port || 8000;
 app.use(cors({origin:'*'}))
 
 const UNIT_CELSIUS = "celsius"
+const UNIT_PERCENT = "percent"
 
 const dataModel = [
+    {
+        topic: "sensors/temperature_out",
+        value: -1,
+        unit: UNIT_CELSIUS,
+        lastUpdated: Date.now()
+    },
+    {
+        topic: "sensors/humidity",
+        value: -1,
+        unit: UNIT_PERCENT,
+        lastUpdated: Date.now()
+    },
     {
         topic: "device/temperature",
         value: -1,
@@ -41,6 +54,10 @@ mqttClient.on("message", (topic, payload, packet) => {
             dataModel[dataIdx].lastUpdated = Date.now();
         }
     }
+})
+
+app.get("/api/all", (req, res) =>  {
+    res.json(dataModel);
 })
 
 app.get("/api/*", (req, res) => {

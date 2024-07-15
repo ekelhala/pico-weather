@@ -12,14 +12,18 @@ export default function Home() {
   const [data, setData] = useState([])
 
   const TOPIC_TEXTS = {
-    'device/temperature': 'Device temperature'
+    'device/temperature': 'Device temperature',
+    'sensors/temperature_out': 'Temperature',
+    'sensors/humidity': 'Relative humidity'
   }
 
   const TOPIC_INFOS = {
-    'device/temperature': 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.'
+    'device/temperature': 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.',
+    'sensors/temperature_out': 'This is a fairly accurate measurement of the outside temperature',
+    'sensors/humidity': 'Relative humidity represents the actual amount of water vapor in the air compared to the amount that can exist in the air in current temperature.'
   }
 
-  const TOPICS = ['device/temperature']
+  const TOPICS = ['sensors/temperature_out', 'sensors/humidity', 'device/temperature']
   
   const dateFormat = {
     day:"numeric",
@@ -32,20 +36,18 @@ export default function Home() {
 
   useEffect(() => {
     const getStartData = async () => {
-      await getData('device/temperature')
+      await getData('all')
     }
     getStartData();
   },[])
 
   const getData = async (uri) => {
     const freshData = (await axios.get(`${API_URL}/${uri}`)).data;
-    setData([freshData]);
+    setData(freshData);
   }
 
   const updateAll = async () => {
-    TOPICS.forEach(async topic => {
-      await getData(topic);
-    })
+    await getData('all')
   }
 
   return (
@@ -86,10 +88,10 @@ export default function Home() {
       <Row xs={1} md={2} lg={2}>
       {data.map(dataItem => {
         return(
-        <Col key={dataItem.topic}> 
-        <DataCard
+        <Col key={dataItem.topic} className="my-1"> 
+        <DataCard key={dataItem.topic}
                 dataName={TOPIC_TEXTS[dataItem.topic]}
-                value={dataItem.value + '\u00b0' + (dataItem.unit==='celsius'? 'C' : 'F')}
+                value={dataItem.value + (dataItem.unit==='celsius'? '\u00b0 C' : '%')}
                 info={TOPIC_INFOS[dataItem.topic]}
                 date={new Date(dataItem.lastUpdated).toLocaleDateString({}, dateFormat)}
                 />
