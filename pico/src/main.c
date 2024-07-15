@@ -18,23 +18,27 @@
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
 void process_data_task(__unused void *pvParams);
-void outside_temp_task(__unused void* pvParams);
+void sht30_task(__unused void* pvParams);
+
+float ema(float new, float old);
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 void mqtt_published_cb(void *arg, err_t error);
 
 #define TEMPERATURE_DEVICE_TOPIC "device/temperature"
+#define TEMPERATURE_OUT_TOPIC "sensors/temperature_out"
+#define HUMIDITY_TOPIC "sensors/humidity"
 
 #define SECOND 1000
 #define MINUTE 60*SECOND
 
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
-#define MEASURE_DELAY 10*SECOND
+#define MEASURE_DELAY SECOND
 
 #define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
 
 #define PROCESS_DELAY 10*SECOND
-#define TEMPERATURE_DEVICE_AVERAGE_WINDOW 10
+#define AVERAGE_WINDOW 20
 
 
 static const struct mqtt_connect_client_info_t client_info = {
@@ -49,19 +53,13 @@ static const struct mqtt_connect_client_info_t client_info = {
 };
 static mqtt_client_t* client;
 
-// A struct holding data readings from sensors etc...
-struct application_data {
-    float device_temp_readings[TEMPERATURE_DEVICE_AVERAGE_WINDOW];
-    float device_temp_average;
-    int device_temp_readings_index;
-};
-
-struct application_data app_data;
-
 struct application_state {
     float device_temp;
     bool is_connected;
     ip_addr_t server_ip;
+    float outside_temperature;
+    float humidity;
+    float device_temperature;
 };
 
 struct application_state app_state;
@@ -70,8 +68,7 @@ int main() {
     stdio_init_all();
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(process_data_task, "PROCESS_DATA_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(outside_temp_task, "OUTSIDE_TEMP_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(sht30_task, "OUTSIDE_TEMP_TASK", 512, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
 }
@@ -124,10 +121,14 @@ void publish_task(__unused void *pvParams) {
             }
         }
         if(connect == ERR_OK) {
-            char temperature_value[4];
+            char buffer[4];
             // Publish device temperature
-            sprintf(&temperature_value, "%.2f", app_state.device_temp);
-            mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, temperature_value, strlen(temperature_value), 0, 0, mqtt_published_cb, NULL);
+            sprintf(&buffer, "%.2f", app_state.device_temperature);
+            mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            sprintf(&buffer, "%.2f", app_state.outside_temperature);
+            mqtt_publish(client, TEMPERATURE_OUT_TOPIC, buffer, 4, 0, 0, mqtt_publish, NULL);
+            sprintf(&buffer, "%.2f", app_state.humidity);
+            mqtt_publish(client, HUMIDITY_TOPIC, buffer, 4, 0, 0, mqtt_publish, NULL);
         }
         mqtt_disconnect(client);
         app_state.is_connected = false;
@@ -148,18 +149,13 @@ void device_temp_task(__unused void *pvParams) {
     adc_set_temp_sensor_enabled(true);
     adc_select_input(4);
     while(true) {
-        int index = app_data.device_temp_readings_index;
-        if(index == TEMPERATURE_DEVICE_AVERAGE_WINDOW-1) {
-            index = 0;
-            app_data.device_temp_readings_index = 0;
-        }
-        app_data.device_temp_readings[index] = read_device_temp();
-        app_data.device_temp_readings_index++;
+        float new_temp = read_device_temp();
+        app_state.device_temperature = ema(new_temp, app_state.device_temperature);
         vTaskDelay(TEMPERATURE_DEVICE_MEAS_DELAY / portTICK_PERIOD_MS);
     }
 }
 
-void outside_temp_task(__unused void *pvParams) {
+void sht30_task(__unused void *pvParams) {
     uint16_t raw_temp = 0;
     uint16_t raw_hum = 0;
 
@@ -173,12 +169,13 @@ void outside_temp_task(__unused void *pvParams) {
     vTaskDelay(1 / portTICK_PERIOD_MS);
     sht30_reset();
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    while(1) {
+    while(true) {
         if(sht30_get_data(&raw_temp, &raw_hum)) {
             float temp_out = sht30_convert_temperature(raw_temp);
             float hum = sht30_convert_humidity(raw_hum);
-            printf("Outside temperature: %f\n", temp_out);
-            printf("Relative humidity: %f percent\n", hum);
+            // Apply filter
+            app_state.outside_temperature = ema(temp_out, app_state.outside_temperature);
+            app_state.humidity = ema(hum, app_state.humidity);
         }
         else {
             printf("Cannot read humidity and temperature!\n");
@@ -187,16 +184,9 @@ void outside_temp_task(__unused void *pvParams) {
     }
 }
 
-void process_data_task(__unused void *pvParams) {
-    while(true) {
-        // Calculating average of chip temperatures
-        float sum = 0;
-        for(int i=0; i<TEMPERATURE_DEVICE_AVERAGE_WINDOW; i++) {
-            sum += app_data.device_temp_readings[i];
-        }
-        app_state.device_temp = sum / TEMPERATURE_DEVICE_AVERAGE_WINDOW;
-        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
-    }
+// A smoothing filter [y(n)=ax(n)+(1-a)y(n-1)] with a=1/10
+float ema(float new, float old) {
+    return ((new + 9*old) / 10);
 }
 
 void mqtt_published_cb(void *arg, err_t error) {}
