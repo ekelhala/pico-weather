@@ -160,8 +160,8 @@ void device_temp_task(__unused void *pvParams) {
 }
 
 void outside_temp_task(__unused void *pvParams) {
-    uint16_t raw_temp;
-    uint16_t raw_hum;
+    uint16_t raw_temp = 0;
+    uint16_t raw_hum = 0;
 
     // Initializing I2C
     i2c_init(i2c_default, 100*1000);
@@ -169,7 +169,10 @@ void outside_temp_task(__unused void *pvParams) {
     gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
     gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
-
+    sht30_stop_measurement();
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+    sht30_reset();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     while(1) {
         if(sht30_get_data(&raw_temp, &raw_hum)) {
             float temp_out = sht30_convert_temperature(raw_temp);
@@ -180,7 +183,7 @@ void outside_temp_task(__unused void *pvParams) {
         else {
             printf("Cannot read humidity and temperature!\n");
         }
-        vTaskDelay(MEASURE_DELAY / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
 
