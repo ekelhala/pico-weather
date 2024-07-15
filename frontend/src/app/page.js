@@ -99,10 +99,10 @@ export default function Home() {
           )
       })}
       </Row>
+      <Row className="my-3">
+        <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
+      </Row>
       </Container>
-      <footer style={{position: 'absolute', bottom:'0'}}>
-      <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
-      </footer>
     </>
   );
 }
