@@ -33,7 +33,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define MINUTE 60*SECOND
 
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
-#define MEASURE_DELAY SECOND
+#define MEASURE_DELAY 10*SECOND
 
 #define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
 
@@ -151,7 +151,7 @@ void device_temp_task(__unused void *pvParams) {
     while(true) {
         float new_temp = read_device_temp();
         app_state.device_temperature = ema(new_temp, app_state.device_temperature);
-        vTaskDelay(TEMPERATURE_DEVICE_MEAS_DELAY / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
 
