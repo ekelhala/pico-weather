@@ -95,10 +95,18 @@ void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t 
             // Publish device temperature
             sprintf(&buffer, "%.2f", app_state.device_temperature);
             mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            // Publish outside temperature
             sprintf(&buffer, "%.2f", app_state.outside_temperature);
             mqtt_publish(client, TEMPERATURE_OUT_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            // Publish humidity
             sprintf(&buffer, "%.2f", app_state.humidity);
             mqtt_publish(client, HUMIDITY_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            // Publish illuminance
+            sprintf(&buffer, "%.2f", app_state.illuminance);
+            mqtt_publish(client, ILLUMINANCE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            // Publish uv index
+            sprintf(&buffer, "%.2f", app_state.uv_index);
+            mqtt_publish(client, UV_INDEX_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
         }
         mqtt_disconnect(client);
 }
