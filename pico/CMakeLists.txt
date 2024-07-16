@@ -16,7 +16,8 @@ pico_sdk_init()
 
 add_executable(main
                 src/main.c
-                src/sht30.c)
+                src/sht30.c
+                src/ltr390.c)
 
 
 if(DEFINED ENABLE_USB)

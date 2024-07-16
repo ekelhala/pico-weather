@@ -14,11 +14,13 @@
 #include "env.h"
 
 #include <sht30.h>
+#include <ltr390.h>
 
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
 void sht30_task(__unused void* pvParams);
 void network_task(__unused void *pvParams);
+void ltr390_task(__unused void*pvParams);
 
 float ema(float new, float old);
 
@@ -61,6 +63,8 @@ struct application_state {
     float outside_temperature;
     float humidity;
     float device_temperature;
+    float uv_index;
+    float illuminance;
 };
 
 struct application_state app_state;
@@ -68,9 +72,18 @@ struct application_state app_state;
 int main() {
     stdio_init_all();
     app_state.network_initialized = false;
+
+    // Initializing I2C
+    i2c_init(i2c_default, 100*1000);
+    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(sht30_task, "OUTSIDE_TEMP_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(sht30_task, "SHT30_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(ltr390_task, "LTR390_TASK", 512, NULL, 1, NULL);
     xTaskCreate(network_task, "NETWORK_TASK", 2048, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
@@ -164,13 +177,6 @@ void device_temp_task(__unused void *pvParams) {
 void sht30_task(__unused void *pvParams) {
     uint16_t raw_temp = 0;
     uint16_t raw_hum = 0;
-
-    // Initializing I2C
-    i2c_init(i2c_default, 100*1000);
-    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
-    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
-    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
-    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
     sht30_stop_measurement();
     vTaskDelay(1 / portTICK_PERIOD_MS);
     sht30_reset();
@@ -186,6 +192,17 @@ void sht30_task(__unused void *pvParams) {
         else {
             printf("Cannot read humidity and temperature!\n");
         }
+        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
+    }
+}
+
+void ltr390_task(__unused void*pvParams) {
+    int32_t raw_value;
+    ltr390_enable(LTR390_MODE_ALS);
+    while(true) {
+        ltr390_get_data(&raw_value);
+        float lux = ltr390_convert_als(raw_value);
+        printf("Lux: %f", lux);
         vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
