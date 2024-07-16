@@ -82,7 +82,7 @@ int main() {
 
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(sht30_task, "SHT30_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(sht30_task, "SHT30_TASK", 1024, NULL, 1, NULL);
     xTaskCreate(ltr390_task, "LTR390_TASK", 512, NULL, 1, NULL);
     xTaskCreate(network_task, "NETWORK_TASK", 2048, NULL, 1, NULL);
     vTaskStartScheduler();
@@ -177,10 +177,12 @@ void device_temp_task(__unused void *pvParams) {
 void sht30_task(__unused void *pvParams) {
     uint16_t raw_temp = 0;
     uint16_t raw_hum = 0;
+    int32_t raw_lux = 0;
     sht30_stop_measurement();
     vTaskDelay(1 / portTICK_PERIOD_MS);
     sht30_reset();
     vTaskDelay(100 / portTICK_PERIOD_MS);
+    printf("Sensors configured\n");
     while(true) {
         if(sht30_get_data(&raw_temp, &raw_hum)) {
             float temp_out = sht30_convert_temperature(raw_temp);
@@ -192,17 +194,20 @@ void sht30_task(__unused void *pvParams) {
         else {
             printf("Cannot read humidity and temperature!\n");
         }
+        ltr390_enable(LTR390_MODE_ALS);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        ltr390_get_data(&raw_lux);
+        ltr390_disable();
+        float lux = ltr390_convert_als(raw_lux);
+        printf("Lux: %f\n", lux);
         vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
 
 void ltr390_task(__unused void*pvParams) {
-    int32_t raw_value;
-    ltr390_enable(LTR390_MODE_ALS);
+    int32_t raw_value = 0;
+
     while(true) {
-        ltr390_get_data(&raw_value);
-        float lux = ltr390_convert_als(raw_value);
-        printf("Lux: %f", lux);
         vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
