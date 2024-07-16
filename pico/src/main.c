@@ -18,9 +18,8 @@
 
 void publish_task(__unused void *pvParams);
 void device_temp_task(__unused void *pvParams);
-void sht30_task(__unused void* pvParams);
+void sensor_task(__unused void* pvParams);
 void network_task(__unused void *pvParams);
-void ltr390_task(__unused void*pvParams);
 
 float ema(float new, float old);
 
@@ -84,8 +83,7 @@ int main() {
 
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(sht30_task, "SHT30_TASK", 1024, NULL, 1, NULL);
-    xTaskCreate(ltr390_task, "LTR390_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(sensor_task, "SENSOR_TASK", 1024, NULL, 1, NULL);
     xTaskCreate(network_task, "NETWORK_TASK", 2048, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
@@ -176,7 +174,7 @@ void device_temp_task(__unused void *pvParams) {
     }
 }
 
-void sht30_task(__unused void *pvParams) {
+void sensor_task(__unused void *pvParams) {
     uint16_t raw_temp = 0;
     uint16_t raw_hum = 0;
     int32_t raw_lux = 0;
@@ -210,14 +208,6 @@ void sht30_task(__unused void *pvParams) {
         float uvi = ltr390_convert_uvs(raw_uvs);
         app_state.illuminance = ema(lux, app_state.illuminance);
         app_state.uv_index = ema(uvi, app_state.uv_index);
-        vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
-    }
-}
-
-void ltr390_task(__unused void*pvParams) {
-    int32_t raw_value = 0;
-
-    while(true) {
         vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
