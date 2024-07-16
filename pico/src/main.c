@@ -30,7 +30,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define TEMPERATURE_OUT_TOPIC "sensors/temperature_out"
 #define HUMIDITY_TOPIC "sensors/humidity"
 #define ILLUMINANCE_TOPIC "sensors/illuminance"
-#define UV_INDEX_TOPIC "sensors/uvi"
+#define UV_INDEX_TOPIC "sensors/uv_index"
 
 #define SECOND 1000
 #define MINUTE 60*SECOND
@@ -38,7 +38,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
 #define MEASURE_DELAY 10*SECOND
 
-#define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
+#define PUBLISH_DELAY MINUTE // How frequently we publish new data?
 
 #define PROCESS_DELAY 10*SECOND
 #define AVERAGE_WINDOW 20
@@ -91,22 +91,26 @@ int main() {
 
 void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
         if(status == ERR_OK) {
-            char buffer[4];
+            char buffer[10];
             // Publish device temperature
-            sprintf(&buffer, "%.2f", app_state.device_temperature);
+            sprintf(buffer, "%.2f", app_state.device_temperature);
             mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            memset(buffer, '\0', sizeof(buffer));
             // Publish outside temperature
-            sprintf(&buffer, "%.2f", app_state.outside_temperature);
+            sprintf(buffer, "%.2f", app_state.outside_temperature);
             mqtt_publish(client, TEMPERATURE_OUT_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            memset(buffer, '\0', sizeof(buffer));
             // Publish humidity
-            sprintf(&buffer, "%.2f", app_state.humidity);
+            sprintf(buffer, "%.2f", app_state.humidity);
             mqtt_publish(client, HUMIDITY_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            memset(buffer, '\0', sizeof(buffer));
             // Publish illuminance
-            sprintf(&buffer, "%.2f", app_state.illuminance);
-            mqtt_publish(client, ILLUMINANCE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
-            // Publish uv index
-            sprintf(&buffer, "%.2f", app_state.uv_index);
-            mqtt_publish(client, UV_INDEX_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
+            sprintf(buffer, "%.2f", app_state.illuminance);
+            mqtt_publish(client, ILLUMINANCE_TOPIC, buffer, strlen(buffer), 0, 0, mqtt_published_cb, NULL);
+            memset(buffer, '\0', sizeof(buffer));
+            // Publish uv index            
+            sprintf(buffer, "%.2f", app_state.uv_index);
+            err_t ret = mqtt_publish(client, UV_INDEX_TOPIC, buffer, strlen(buffer), 0, 0, mqtt_published_cb, NULL);
         }
         mqtt_disconnect(client);
 }
