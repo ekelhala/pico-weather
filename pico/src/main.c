@@ -35,7 +35,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
 #define MEASURE_DELAY 10*SECOND
 
-#define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
+#define PUBLISH_DELAY MINUTE // How frequently we publish new data?
 
 #define PROCESS_DELAY 10*SECOND
 #define AVERAGE_WINDOW 20
@@ -55,7 +55,7 @@ static mqtt_client_t* client;
 
 struct application_state {
     float device_temp;
-    bool is_connected;
+    bool cyw43_initialized;
     bool network_initialized;
     ip_addr_t server_ip;
     float outside_temperature;
@@ -67,10 +67,11 @@ struct application_state app_state;
 
 int main() {
     stdio_init_all();
+    app_state.network_initialized = false;
     xTaskCreate(publish_task, "PUBLISH_TASK", 2048, NULL, 1, NULL);
     xTaskCreate(device_temp_task, "DEVICE_TEMP_TASK", 512, NULL, 1, NULL);
     xTaskCreate(sht30_task, "OUTSIDE_TEMP_TASK", 512, NULL, 1, NULL);
-    xTaskCreate(network_task, "NETWORK_TASK", 512, NULL, 1, NULL);
+    xTaskCreate(network_task, "NETWORK_TASK", 2048, NULL, 1, NULL);
     vTaskStartScheduler();
     return 0;
 }
@@ -82,25 +83,29 @@ void mqtt_connect_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t 
             sprintf(&buffer, "%.2f", app_state.device_temperature);
             mqtt_publish(client, TEMPERATURE_DEVICE_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
             sprintf(&buffer, "%.2f", app_state.outside_temperature);
-            mqtt_publish(client, TEMPERATURE_OUT_TOPIC, buffer, 4, 0, 0, mqtt_publish, NULL);
+            mqtt_publish(client, TEMPERATURE_OUT_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
             sprintf(&buffer, "%.2f", app_state.humidity);
-            mqtt_publish(client, HUMIDITY_TOPIC, buffer, 4, 0, 0, mqtt_publish, NULL);
+            mqtt_publish(client, HUMIDITY_TOPIC, buffer, 4, 0, 0, mqtt_published_cb, NULL);
         }
         mqtt_disconnect(client);
 }
 
 void publish_task(__unused void *pvParams) {
     // Initializations
-    client = mqtt_client_new();
-    ip_addr_t ip;
-    ipaddr_aton(MQTT_SERVER_ADDR, &ip);
-    app_state.server_ip = ip;
     // Wait so that we don't publish unprocessed values
+    bool task_initialized = false;
+    ip_addr_t ip;
     vTaskDelay(PUBLISH_DELAY / portTICK_PERIOD_MS);
     while(true) {
-        err_t connect;
-        // Indicate that we are connecting
-        if(app_state.network_initialized) {
+        if(app_state.cyw43_initialized && !task_initialized) {
+            cyw43_arch_lwip_begin();
+            client = mqtt_client_new();
+            cyw43_arch_lwip_end();
+            ipaddr_aton(MQTT_SERVER_ADDR, &ip);
+            app_state.server_ip = ip;
+            task_initialized = true;
+        }
+        if(app_state.network_initialized && task_initialized) {
             // Connect to server
             ip = app_state.server_ip;
             cyw43_arch_lwip_begin();
@@ -112,12 +117,10 @@ void publish_task(__unused void *pvParams) {
 }
 
 void network_task(__unused void *pvParams) {
+    cyw43_arch_init();
+    app_state.cyw43_initialized = true;
     while(true) {
         if(!app_state.network_initialized) {
-            if(cyw43_arch_init()) {
-                printf("Init failed!\n");
-            }
-            else {
                 cyw43_arch_enable_sta_mode();
                 if(cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK)) {
                     printf("Failed to connect\n");
@@ -125,7 +128,6 @@ void network_task(__unused void *pvParams) {
                 else {
                     app_state.network_initialized = true;
                 }
-            }
         }
         else {
             if(cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) != CYW43_LINK_UP) {
