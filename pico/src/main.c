@@ -30,6 +30,8 @@ void mqtt_published_cb(void *arg, err_t error);
 #define TEMPERATURE_DEVICE_TOPIC "device/temperature"
 #define TEMPERATURE_OUT_TOPIC "sensors/temperature_out"
 #define HUMIDITY_TOPIC "sensors/humidity"
+#define ILLUMINANCE_TOPIC "sensors/illuminance"
+#define UV_INDEX_TOPIC "sensors/uvi"
 
 #define SECOND 1000
 #define MINUTE 60*SECOND
@@ -37,7 +39,7 @@ void mqtt_published_cb(void *arg, err_t error);
 #define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
 #define MEASURE_DELAY 10*SECOND
 
-#define PUBLISH_DELAY MINUTE // How frequently we publish new data?
+#define PUBLISH_DELAY 2*MINUTE // How frequently we publish new data?
 
 #define PROCESS_DELAY 10*SECOND
 #define AVERAGE_WINDOW 20
@@ -178,6 +180,7 @@ void sht30_task(__unused void *pvParams) {
     uint16_t raw_temp = 0;
     uint16_t raw_hum = 0;
     int32_t raw_lux = 0;
+    int32_t raw_uvs = 0;
     sht30_stop_measurement();
     vTaskDelay(1 / portTICK_PERIOD_MS);
     sht30_reset();
@@ -198,8 +201,15 @@ void sht30_task(__unused void *pvParams) {
         vTaskDelay(pdMS_TO_TICKS(100));
         ltr390_get_data(&raw_lux);
         ltr390_disable();
+        vTaskDelay(pdMS_TO_TICKS(100));
+        ltr390_enable(LTR390_MODE_UVS);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        ltr390_get_data(&raw_uvs);
+        ltr390_disable();
         float lux = ltr390_convert_als(raw_lux);
-        printf("Lux: %f\n", lux);
+        float uvi = ltr390_convert_uvs(raw_uvs);
+        app_state.illuminance = ema(lux, app_state.illuminance);
+        app_state.uv_index = ema(uvi, app_state.uv_index);
         vTaskDelay(pdMS_TO_TICKS(MEASURE_DELAY));
     }
 }
