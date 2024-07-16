@@ -35,14 +35,9 @@ void mqtt_published_cb(void *arg, err_t error);
 #define SECOND 1000
 #define MINUTE 60*SECOND
 
-#define TEMPERATURE_DEVICE_MEAS_DELAY SECOND
-#define MEASURE_DELAY 10*SECOND
+#define MEASURE_DELAY 30*SECOND
 
-#define PUBLISH_DELAY MINUTE // How frequently we publish new data?
-
-#define PROCESS_DELAY 10*SECOND
-#define AVERAGE_WINDOW 20
-
+#define PUBLISH_DELAY 5*MINUTE // How frequently we publish new data?
 
 static const struct mqtt_connect_client_info_t client_info = {
     "weather-station-1",
