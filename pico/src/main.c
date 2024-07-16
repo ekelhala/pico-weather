@@ -130,7 +130,7 @@ void network_task(__unused void *pvParams) {
                 }
         }
         else {
-            if(cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) != CYW43_LINK_UP) {
+            if(cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) < 1) {
                 // Reconnect
                 printf("Link down, reconnecting...\n");
                 cyw43_arch_disable_sta_mode();
