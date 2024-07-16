@@ -27,13 +27,7 @@ const dataModel = [
         lastUpdated: Date.now()
     },
     {
-        topic: "device/temperature",
-        value: -1,
-        unit: UNIT_CELSIUS,
-        lastUpdated: Date.now()
-    },
-    {
-        topic: "sensors/uvi",
+        topic: "sensors/uv_index",
         value: 0,
         unit: UNIT_NONE,
         lastUpdated: Date.now()
@@ -42,6 +36,12 @@ const dataModel = [
         topic: "sensors/illuminance",
         value: 0,
         unit: UNIT_LUX,
+        lastUpdated: Date.now()
+    },
+    {
+        topic: "device/temperature",
+        value: -1,
+        unit: UNIT_CELSIUS,
         lastUpdated: Date.now()
     }
 ]

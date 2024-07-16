@@ -1,4 +1,5 @@
 import ReactShowMoreText from "react-show-more-text";
+import UVIndexCard from "./UVIndexCard";
 
 const { Card, CardHeader, CardTitle, CardBody, Accordion, CardFooter } = require("react-bootstrap");
 
@@ -12,6 +13,11 @@ function ExpandCollapseButton(props) {
 }
 
 function DataCard(props) {
+    if(props.topic == 'sensors/uv_index') {
+        return (
+            <UVIndexCard value={props.value} date={props.date}/>
+        )
+    }
     return(
         <Card data-bs-theme="dark">
             <CardHeader>{props.dataName}</CardHeader>

@@ -23,8 +23,34 @@ export default function Home() {
     'sensors/humidity': 'Relative humidity represents the actual amount of water vapor in the air compared to the amount that can exist in the air in current temperature.'
   }
 
-  const TOPICS = ['sensors/temperature_out', 'sensors/humidity', 'device/temperature']
+  const TOPICS = {'sensors/temperature_out': {
+                    name: 'Temperature',
+                    info: 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.'
+                  },
+                  'sensors/humidity': {
+                    name: 'Humidity',
+                    info: 'This is a fairly accurate measurement of the outside temperature'
+                  },
+                  'device/temperature': {
+                    name: 'Device temperature',
+                    info: 'Relative humidity represents the actual amount of water vapor in the air compared to the amount that can exist in the air in current temperature.'
+                  },
+                  'sensors/illuminance': {
+                    name: 'Illuminance',
+                    info: 'Direct sunlight is approximately 100 000 lux, while overcast day is 1000'
+                  },
+                  'sensors/uv_index': {
+                    name: 'UV index',
+                    info: 'UV index is a standard measurement of the strength of ultraviolet radiation. Levels of 0 to 2 are considered low, and when readings are bigger than 3, the risk of harm starts to increase'
+                  }};
   
+  const units = {
+    celsius: "\u00b0C",
+    lux: " lux",
+    none: "",
+    percent: "%"
+  }
+
   const dateFormat = {
     day:"numeric",
     year:"numeric",
@@ -90,9 +116,10 @@ export default function Home() {
         return(
         <Col key={dataItem.topic} className="my-1"> 
         <DataCard key={dataItem.topic}
-                dataName={TOPIC_TEXTS[dataItem.topic]}
-                value={dataItem.value + (dataItem.unit==='celsius'? '\u00b0 C' : '%')}
-                info={TOPIC_INFOS[dataItem.topic]}
+                topic={dataItem.topic}
+                dataName={TOPICS[dataItem.topic].name}
+                value={dataItem.value + (units[dataItem.unit])}
+                info={TOPICS[dataItem.topic].info}
                 date={new Date(dataItem.lastUpdated).toLocaleDateString({}, dateFormat)}
                 />
           </Col>
