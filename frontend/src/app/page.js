@@ -11,28 +11,16 @@ export default function Home() {
 
   const [data, setData] = useState([])
 
-  const TOPIC_TEXTS = {
-    'device/temperature': 'Device temperature',
-    'sensors/temperature_out': 'Temperature',
-    'sensors/humidity': 'Relative humidity'
-  }
-
-  const TOPIC_INFOS = {
-    'device/temperature': 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.',
-    'sensors/temperature_out': 'This is a fairly accurate measurement of the outside temperature',
-    'sensors/humidity': 'Relative humidity represents the actual amount of water vapor in the air compared to the amount that can exist in the air in current temperature.'
-  }
-
-  const TOPICS = {'sensors/temperature_out': {
-                    name: 'Temperature',
+  const TOPICS = {'device/temperature': {
+                    name: 'Device temperature',
                     info: 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.'
+                  },
+                  'sensors/temperature_out': {
+                    name: 'Temperature',
+                    info: 'This is a fairly accurate measurement of the outside temperature'
                   },
                   'sensors/humidity': {
                     name: 'Humidity',
-                    info: 'This is a fairly accurate measurement of the outside temperature'
-                  },
-                  'device/temperature': {
-                    name: 'Device temperature',
                     info: 'Relative humidity represents the actual amount of water vapor in the air compared to the amount that can exist in the air in current temperature.'
                   },
                   'sensors/illuminance': {
@@ -41,7 +29,7 @@ export default function Home() {
                   },
                   'sensors/uv_index': {
                     name: 'UV index',
-                    info: 'UV index is a standard measurement of the strength of ultraviolet radiation. Levels of 0 to 2 are considered low, and when readings are bigger than 3, the risk of harm starts to increase'
+                    info: ''
                   }};
   
   const units = {
