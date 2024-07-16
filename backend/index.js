@@ -10,6 +10,8 @@ app.use(cors({origin:'*'}))
 
 const UNIT_CELSIUS = "celsius"
 const UNIT_PERCENT = "percent"
+const UNIT_NONE = "none"
+const UNIT_LUX = "lux"
 
 const dataModel = [
     {
@@ -28,6 +30,18 @@ const dataModel = [
         topic: "device/temperature",
         value: -1,
         unit: UNIT_CELSIUS,
+        lastUpdated: Date.now()
+    },
+    {
+        topic: "sensors/uvi",
+        value: 0,
+        unit: UNIT_NONE,
+        lastUpdated: Date.now()
+    },
+    {
+        topic: "sensors/illuminance",
+        value: 0,
+        unit: UNIT_LUX,
         lastUpdated: Date.now()
     }
 ]
