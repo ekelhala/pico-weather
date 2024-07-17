@@ -29,7 +29,7 @@ function DataCard(props) {
         )
     }
     return(
-        <Card data-bs-theme="dark">
+        <Card data-bs-theme="dark" style={{height: "200px"}}>
             <CardHeader>{props.dataName}</CardHeader>
             <CardBody>
                 <CardTitle>{props.value}</CardTitle>

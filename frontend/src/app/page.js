@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import DataCard from "./components/DataCard";
-import { Button, Card, Col, Container, Navbar, Row, Stack, Tab, Tabs } from "react-bootstrap";
+import { Button, Card, Col, Container, Navbar, OverlayTrigger, Row, Stack, Tab, Tabs, Tooltip } from "react-bootstrap";
 import { BsArrowCounterclockwise, BsAt, BsCpu, BsGeoAlt, BsGithub } from "react-icons/bs";
 
 export default function Home() {
@@ -90,9 +90,9 @@ export default function Home() {
         <Tab eventKey="weather" title="Weather">
           <Container fluid>
             <Row className="my-2">
-              <Col>
-                Updated: {new Date(data.lastUpdated).toLocaleString(dateFormat)}              
-              </Col>
+              <div className="d-flex justify-content-center">
+                <p>Updated: {new Date(data.lastUpdated).toLocaleString(dateFormat)}</p>              
+              </div>
             </Row>
             <Row xs={1} md={2} lg={2} className="g-4">
             {data.data.map(dataItem => {
@@ -136,7 +136,7 @@ export default function Home() {
                   </li>
                   <li>
                     <Stack gap={2} direction="horizontal">
-                      <BsAt size="1.2em"/>
+                        <BsAt size="1.2em"/>
                        {process.env.NEXT_PUBLIC_STATION_CONTACT ? process.env.NEXT_PUBLIC_STATION_CONTACT : "Not specified"}
                     </Stack>
                   </li>
@@ -145,7 +145,7 @@ export default function Home() {
             </Card>
             </Col>
             </Row>
-            <Row xs={1} md={2} lg={2} className="g-4">
+            <Row xs={1} md={2} lg={2} className="my-2">
             {deviceInfo.map(info => {
               return(
                 <Col>
