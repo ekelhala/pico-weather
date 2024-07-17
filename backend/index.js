@@ -13,7 +13,9 @@ const UNIT_PERCENT = "percent"
 const UNIT_NONE = "none"
 const UNIT_LUX = "lux"
 
-const dataModel = [
+const state = {
+    lastUpdated: Date.now(),
+    data: [
     {
         topic: "sensors/temperature_out",
         value: -1,
@@ -30,21 +32,23 @@ const dataModel = [
         topic: "sensors/uv_index",
         value: 0,
         unit: UNIT_NONE,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
+        extraInfo: []
     },
     {
         topic: "sensors/illuminance",
         value: 0,
         unit: UNIT_LUX,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
+        extraInfo: []
     },
     {
         topic: "device/temperature",
         value: -1,
         unit: UNIT_CELSIUS,
         lastUpdated: Date.now()
-    }
-]
+    }]
+}
 
 const mqttOptions = {
     host: process.env.MQTT_BROKER_ADDR,
@@ -53,19 +57,66 @@ const mqttOptions = {
     password: process.env.MQTT_PASSWORD
 }
 
+const uvExtraInfos = {
+    low: ['Low', 'green'],
+    moderate: ['Moderate', 'yellow'],
+    high: ['High', 'orange'],
+    veryHigh: ['Very high', 'red'],
+    extreme: ['Extreme', 'violet']
+}
+
+const illuminanceExtraInfos = {
+    dark: ['Dark'],
+    lowLight: ['Low light'],
+    overcast: ['Overcast'],
+    daylight: ['Daylight'],
+    bright: ['Bright']
+}
+
+const getUVExtraInfo = (uvValue) => {
+    if(uvValue <= 2)
+        return uvExtraInfos.low;
+    else if(uvValue <= 5)
+        return uvExtraInfos.moderate;    
+    else if(uvValue <= 7)
+        return uvExtraInfos.high;
+    else if(uvValue <= 10)
+        return uvExtraInfos.veryHigh;
+    return uvExtraInfos.extreme;
+}
+
+const getIlluminanceExtraInfo = (illuminanceValue) => {
+    if(illuminanceValue <= 500)
+        return illuminanceExtraInfos.dark;
+    else if(illuminanceValue <= 5380)
+        return illuminanceExtraInfos.lowLight;
+    else if(illuminanceValue <= 21520)
+        return illuminanceExtraInfos.overcast;
+    else if(illuminanceValue <= 43050)
+        return illuminanceExtraInfos.daylight;
+    return illuminanceExtraInfos.bright;
+}
+
 const mqttClient = MQTT.connect(mqttOptions);
 mqttClient.on("connect", () => {
     console.log("Connected to broker!");
     console.log("Subscribing to %d topics", dataModel.length);
-    for(let dataIdx in dataModel) {
-        mqttClient.subscribe(dataModel[dataIdx].topic);
+    for(let dataIdx in state.data) {
+        mqttClient.subscribe(state.data[dataIdx].topic);
     }
 })
 mqttClient.on("message", (topic, payload, packet) => {
-    for(let dataIdx in dataModel) {
-        if(dataModel[dataIdx].topic == topic) {
-            dataModel[dataIdx].value = payload.toString();
-            dataModel[dataIdx].lastUpdated = Date.now();
+    for(let dataIdx in state.data) {
+        let dataItem = state.data[dataIdx];
+        if(dataItem.topic === topic) {
+            dataItem.value = payload.toString();
+            state.lastUpdated = Date.now();
+            if(dataItem.topic === 'sensors/uv_index') {
+                dataItem.extraInfo = getUVExtraInfo(dataItem.value)
+            }
+            else if(dataItem.topic === 'sensors/illuminace') {
+                dataItem.extraInfo = getIlluminanceExtraInfo(dataItem.value);
+            }
         }
     }
 })
