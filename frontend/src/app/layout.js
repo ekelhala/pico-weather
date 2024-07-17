@@ -1,7 +1,7 @@
 
 export const metadata = {
-  title: "pico-weather dashboard",
-  description: "See real-time data straight from your Pico weather station!",
+  title: "Dashboard",
+  description: "See real-time data straight from Pico weather station!",
 };
 
 import 'bootstrap/dist/css/bootstrap.min.css';

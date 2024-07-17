@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DataCard from "./components/DataCard";
-import { Button, Card, Col, Container, Navbar, Row, Stack } from "react-bootstrap";
+import { Button, Card, Col, Container, Navbar, Row, Stack, Tab, Tabs } from "react-bootstrap";
 import { BsArrowCounterclockwise, BsAt, BsCpu, BsGeoAlt, BsGithub } from "react-icons/bs";
 
 export default function Home() {
@@ -10,14 +10,15 @@ export default function Home() {
   const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
   const [data, setData] = useState({data:[]})
+  const [deviceInfo, setDeviceInfo] = useState([]);
 
   const TOPICS = {'device/temperature': {
-                    name: 'Device temperature',
-                    info: 'This is a rough measurement taken from the Pico\'s RP2040-chip, and it might not reflect the temperature of its surroundings well.'
+                    name: 'System temperature',
+                    info: 'This is a rough measurement taken from the onboard temperature sensor of Pico'
                   },
                   'sensors/temperature_out': {
                     name: 'Temperature',
-                    info: 'This is a fairly accurate measurement of the outside temperature'
+                    info: 'A fairly accurate measurement of the outside temperature'
                   },
                   'sensors/humidity': {
                     name: 'Humidity',
@@ -50,7 +51,8 @@ export default function Home() {
 
   useEffect(() => {
     const getStartData = async () => {
-      await getData('all')
+      await getData('sensors/all')
+      await getDeviceData();
     }
     getStartData();
   },[])
@@ -60,8 +62,15 @@ export default function Home() {
     setData(freshData);
   }
 
+  const getDeviceData = async () => {
+      const deviceData = (await axios.get(`${API_URL}/device/temperature`)).data;
+      // Remember to change here if there is more device data in the future!
+      setDeviceInfo([deviceData]);
+  }
+
   const updateAll = async () => {
-    await getData('all')
+    await getData('sensors/all');
+    await getDeviceData();
   }
 
   return (
@@ -77,47 +86,82 @@ export default function Home() {
           </div>
         </Container>
       </Navbar>
-      <Container fluid className="my-2">
-        <Card>
-          <Card.Header>This Station</Card.Header>
-          <Card.Body>
-            <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '10px'}}>
-              <li><Stack gap={2} direction="horizontal">
-                <BsGeoAlt size="1.2em"/> 
-                Location: {process.env.NEXT_PUBLIC_STATION_LOCATION ? process.env.NEXT_PUBLIC_STATION_LOCATION : "Not specified"}
-                </Stack></li>
-              <li><Stack gap={2} direction="horizontal">
-                <BsCpu size="1.2em"/> 
-                Hardware: {process.env.NEXT_PUBLIC_STATION_HARDWARE ? process.env.NEXT_PUBLIC_STATION_HARDWARE : "Not specified"}
-                </Stack></li>
-              <li><Stack gap={2} direction="horizontal">
-                <BsAt size="1.2em"/>
-                Contact: {process.env.NEXT_PUBLIC_STATION_CONTACT ? process.env.NEXT_PUBLIC_STATION_CONTACT : "Not specified"}
-                </Stack></li>
-            </ul>
-          </Card.Body>  
-        </Card>    
-      </Container>
-      <Container fluid>
-      <Row xs={1} md={2} lg={2}>
-      {data.data.map(dataItem => {
-        return(
-        <Col key={dataItem.topic} className="my-1"> 
-        <DataCard key={dataItem.topic}
-                topic={dataItem.topic}
-                dataName={TOPICS[dataItem.topic].name}
-                value={dataItem.value + (units[dataItem.unit])}
-                info={TOPICS[dataItem.topic].info}
-                extraInfo={dataItem.extraInfo}
-                />
-          </Col>
-          )
-      })}
-      </Row>
-      <Row className="my-3">
-        <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
-      </Row>
-      </Container>
+      <Tabs defaultActiveKey="weather" className="mb-3" justify>
+        <Tab eventKey="weather" title="Weather">
+          <Container fluid>
+            <Row className="my-2">
+              <Col>
+                Updated: {new Date(data.lastUpdated).toLocaleString(dateFormat)}              
+              </Col>
+            </Row>
+            <Row xs={1} md={2} lg={2} className="g-4">
+            {data.data.map(dataItem => {
+              return(
+                <Col key={dataItem.topic}> 
+                  <DataCard key={dataItem.topic}
+                      topic={dataItem.topic}
+                      dataName={TOPICS[dataItem.topic].name}
+                      value={dataItem.value + (units[dataItem.unit])}
+                      info={TOPICS[dataItem.topic].info}
+                      extraInfo={dataItem.extraInfo}
+                    />
+                </Col>
+              )
+            })}
+            </Row>
+            <Row className="my-3">
+              <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
+            </Row>
+          </Container>
+        </Tab>
+        <Tab eventKey="device" title="Device">
+          <Container fluid>
+          <Row className="my-2">
+          <Col>
+          <Card>
+            <Card.Header>This Station</Card.Header>
+              <Card.Body>
+                <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                  <li>
+                    <Stack gap={2} direction="horizontal">
+                      <BsGeoAlt size="1.2em"/> 
+                       {process.env.NEXT_PUBLIC_STATION_LOCATION ? process.env.NEXT_PUBLIC_STATION_LOCATION : "Not specified"}
+                    </Stack>
+                  </li>
+                  <li>
+                    <Stack gap={2} direction="horizontal">
+                      <BsCpu size="1.2em"/> 
+                       {process.env.NEXT_PUBLIC_STATION_HARDWARE ? process.env.NEXT_PUBLIC_STATION_HARDWARE : "Not specified"}
+                    </Stack>
+                  </li>
+                  <li>
+                    <Stack gap={2} direction="horizontal">
+                      <BsAt size="1.2em"/>
+                       {process.env.NEXT_PUBLIC_STATION_CONTACT ? process.env.NEXT_PUBLIC_STATION_CONTACT : "Not specified"}
+                    </Stack>
+                  </li>
+                </ul>
+              </Card.Body>  
+            </Card>
+            </Col>
+            </Row>
+            <Row xs={1} md={2} lg={2} className="g-4">
+            {deviceInfo.map(info => {
+              return(
+                <Col>
+                  <DataCard key={info.topic}
+                      topic={info.topic}
+                      dataName={TOPICS[info.topic].name}
+                      value={info.value + (units[info.unit])}
+                      info={TOPICS[info.topic].info}
+                      extraInfo={info.extraInfo}/>                
+                </Col>
+              )
+            })}
+            </Row>    
+          </Container>
+        </Tab>
+      </Tabs>
     </>
   );
 }

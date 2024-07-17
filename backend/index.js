@@ -123,6 +123,18 @@ app.get("/api/all", (req, res) =>  {
     res.json(state);
 })
 
+app.get("/api/sensors/all", (req, res) => {
+    let ret = {
+        lastUpdated: state.lastUpdated,
+        data:[]
+    }
+    state.data.forEach(data => {
+        if(data.topic.startsWith("sensors"))
+            ret.data.push(data)
+    })
+    res.json(ret);
+})
+
 app.get("/api/*", (req, res) => {
     const topicURI = req.url.slice(5);
     let found = false;
