@@ -19,34 +19,29 @@ const state = {
     {
         topic: "sensors/temperature_out",
         value: -1,
-        unit: UNIT_CELSIUS,
-        lastUpdated: Date.now()
+        unit: UNIT_CELSIUS
     },
     {
         topic: "sensors/humidity",
         value: -1,
         unit: UNIT_PERCENT,
-        lastUpdated: Date.now()
     },
     {
         topic: "sensors/uv_index",
         value: 0,
         unit: UNIT_NONE,
-        lastUpdated: Date.now(),
         extraInfo: []
     },
     {
         topic: "sensors/illuminance",
         value: 0,
         unit: UNIT_LUX,
-        lastUpdated: Date.now(),
         extraInfo: []
     },
     {
         topic: "device/temperature",
         value: -1,
         unit: UNIT_CELSIUS,
-        lastUpdated: Date.now()
     }]
 }
 
@@ -100,7 +95,7 @@ const getIlluminanceExtraInfo = (illuminanceValue) => {
 const mqttClient = MQTT.connect(mqttOptions);
 mqttClient.on("connect", () => {
     console.log("Connected to broker!");
-    console.log("Subscribing to %d topics", dataModel.length);
+    console.log("Subscribing to %d topics", state.data.length);
     for(let dataIdx in state.data) {
         mqttClient.subscribe(state.data[dataIdx].topic);
     }
@@ -114,7 +109,7 @@ mqttClient.on("message", (topic, payload, packet) => {
             if(dataItem.topic === 'sensors/uv_index') {
                 dataItem.extraInfo = getUVExtraInfo(dataItem.value)
             }
-            else if(dataItem.topic === 'sensors/illuminace') {
+            else if(dataItem.topic === 'sensors/illuminance') {
                 dataItem.extraInfo = getIlluminanceExtraInfo(dataItem.value);
             }
         }
