@@ -122,13 +122,13 @@ mqttClient.on("message", (topic, payload, packet) => {
 })
 
 app.get("/api/all", (req, res) =>  {
-    res.json(dataModel);
+    res.json(state);
 })
 
 app.get("/api/*", (req, res) => {
     const topicURI = req.url.slice(5);
     let found = false;
-    dataModel.forEach(data => {
+    state.data.forEach(data => {
         if(data.topic == topicURI) {
             res.json(data);
             found = true;
