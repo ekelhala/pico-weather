@@ -9,7 +9,7 @@ export default function Home() {
 
   const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
-  const [data, setData] = useState([])
+  const [data, setData] = useState({data:[]})
 
   const TOPICS = {'device/temperature': {
                     name: 'Device temperature',
@@ -100,7 +100,7 @@ export default function Home() {
       </Container>
       <Container fluid>
       <Row xs={1} md={2} lg={2}>
-      {data.map(dataItem => {
+      {data.data.map(dataItem => {
         return(
         <Col key={dataItem.topic} className="my-1"> 
         <DataCard key={dataItem.topic}
@@ -108,7 +108,7 @@ export default function Home() {
                 dataName={TOPICS[dataItem.topic].name}
                 value={dataItem.value + (units[dataItem.unit])}
                 info={TOPICS[dataItem.topic].info}
-                date={new Date(dataItem.lastUpdated).toLocaleDateString({}, dateFormat)}
+                extraInfo={dataItem.extraInfo}
                 />
           </Col>
           )

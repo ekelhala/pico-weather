@@ -1,5 +1,6 @@
 import ReactShowMoreText from "react-show-more-text";
 import UVIndexCard from "./UVIndexCard";
+import IlluminanceCard from "./IlluminanceCard";
 
 const { Card, CardHeader, CardTitle, CardBody, Accordion, CardFooter } = require("react-bootstrap");
 
@@ -13,9 +14,18 @@ function ExpandCollapseButton(props) {
 }
 
 function DataCard(props) {
-    if(props.topic == 'sensors/uv_index') {
+    if(props.topic === 'sensors/uv_index') {
         return (
-            <UVIndexCard value={props.value} date={props.date}/>
+            <UVIndexCard dataName={props.dataName}
+                        value={props.value}
+                        extraInfo={props.extraInfo}/>
+        )
+    }
+    else if(props.topic === 'sensors/illuminance') {
+        return(
+            <IlluminanceCard value={props.value} 
+                            extraInfo={props.extraInfo}
+                            dataName={props.dataName}/>
         )
     }
     return(
@@ -36,11 +46,6 @@ function DataCard(props) {
                     </small>
                     </div>
             </CardBody>
-            <CardFooter className="text-muted">
-                <small>
-                    Updated: {props.date}
-                </small>
-            </CardFooter>
         </Card>
     )
 }

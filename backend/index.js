@@ -19,12 +19,14 @@ const state = {
     {
         topic: "sensors/temperature_out",
         value: -1,
-        unit: UNIT_CELSIUS
+        unit: UNIT_CELSIUS,
+        extraInfo: []
     },
     {
         topic: "sensors/humidity",
         value: -1,
         unit: UNIT_PERCENT,
+        extraInfo: []
     },
     {
         topic: "sensors/uv_index",
@@ -42,6 +44,7 @@ const state = {
         topic: "device/temperature",
         value: -1,
         unit: UNIT_CELSIUS,
+        extraInfo: []
     }]
 }
 
