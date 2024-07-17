@@ -14,7 +14,7 @@ function WeatherTab(props) {
     }
 
     return(
-        <Container fluid>
+        <Container fluid className="mx-auto">
         <Row className="my-2">
           <div className="d-flex justify-content-center">
             <p>Updated: {new Date(props.data.lastUpdated).toLocaleString(dateFormat)}</p>              
@@ -35,7 +35,7 @@ function WeatherTab(props) {
           )
         })}
         </Row>
-        <Row className="my-3">
+        <Row className="my-3 mx-auto">
           <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
         </Row>
       </Container>

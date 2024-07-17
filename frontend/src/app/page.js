@@ -1,9 +1,8 @@
 'use client'
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import DataCard from "./components/DataCard";
-import { Button, Card, Col, Container, Navbar, OverlayTrigger, Row, Stack, Tab, Tabs, Tooltip } from "react-bootstrap";
-import { BsArrowCounterclockwise, BsAt, BsCpu, BsGeoAlt, BsGithub } from "react-icons/bs";
+import { Button, Container, Navbar, Tab, Tabs, Toast } from "react-bootstrap";
+import { BsArrowCounterclockwise } from "react-icons/bs";
 import WeatherTab from "./components/WeatherTab";
 import DeviceTab from "./components/DeviceTab";
 
@@ -13,6 +12,7 @@ export default function Home() {
 
   const [data, setData] = useState({data:[]})
   const [deviceInfo, setDeviceInfo] = useState([]);
+  const [showUpdatedToast, setShowUpdatedToast] = useState(false);
 
   const TOPICS = {'device/temperature': {
                     name: 'System temperature',
@@ -64,16 +64,17 @@ export default function Home() {
   const updateAll = async () => {
     await getData('sensors/all');
     await getDeviceData();
+    setShowUpdatedToast(true);
   }
 
   return (
     <>
       <Navbar sticky="top" bg="dark" variant="dark"
-      className="bg-body-tertiary mb-3">
+      className="bg-body-tertiary mx-auto mb-2">
         <Container fluid>
           <div style={{display: "flex", width: "100%", justifyContent:"space-between"}}>
             <Navbar.Brand>Dashboard</Navbar.Brand>
-            <Button variant="outline-light" style={{borderRadius:'15px'}} onClick={async () => updateAll()}>
+            <Button variant="outline" style={{borderRadius:'15px'}} onClick={async () => updateAll()}>
               <BsArrowCounterclockwise size="1.2em"/>
             </Button>
           </div>
@@ -87,6 +88,10 @@ export default function Home() {
           <DeviceTab topics={TOPICS} units={units} deviceInfo={deviceInfo}/>
         </Tab>
       </Tabs>
+      <Toast autohide delay={2000} show={showUpdatedToast}
+        onClose={() => setShowUpdatedToast(false)} style={{position: 'fixed', bottom:'5px', left: '5px'}}>
+        <Toast.Body>Data updated!</Toast.Body>
+      </Toast>
     </>
   );
 }
