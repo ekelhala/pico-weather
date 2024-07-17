@@ -4,6 +4,8 @@ import axios from "axios";
 import DataCard from "./components/DataCard";
 import { Button, Card, Col, Container, Navbar, OverlayTrigger, Row, Stack, Tab, Tabs, Tooltip } from "react-bootstrap";
 import { BsArrowCounterclockwise, BsAt, BsCpu, BsGeoAlt, BsGithub } from "react-icons/bs";
+import WeatherTab from "./components/WeatherTab";
+import DeviceTab from "./components/DeviceTab";
 
 export default function Home() {
 
@@ -18,7 +20,7 @@ export default function Home() {
                   },
                   'sensors/temperature_out': {
                     name: 'Temperature',
-                    info: 'A fairly accurate measurement of the outside temperature'
+                    info: 'A fairly accurate measurement of outside temperature. Note that if the temperature sensor is in direct sunlight, this value might be higher than expected.'
                   },
                   'sensors/humidity': {
                     name: 'Humidity',
@@ -39,15 +41,6 @@ export default function Home() {
     none: "",
     percent: "%"
   }
-
-  const dateFormat = {
-    day:"numeric",
-    year:"numeric",
-    month:"numeric",
-    hour:"numeric",
-    minute:"numeric",
-    second:"numeric"
-}
 
   useEffect(() => {
     const getStartData = async () => {
@@ -86,80 +79,12 @@ export default function Home() {
           </div>
         </Container>
       </Navbar>
-      <Tabs defaultActiveKey="weather" className="mb-3" justify>
+      <Tabs defaultActiveKey="weather" className="mb-3" justify style={{position: 'sticky'}}>
         <Tab eventKey="weather" title="Weather">
-          <Container fluid>
-            <Row className="my-2">
-              <div className="d-flex justify-content-center">
-                <p>Updated: {new Date(data.lastUpdated).toLocaleString(dateFormat)}</p>              
-              </div>
-            </Row>
-            <Row xs={1} md={2} lg={2} className="g-4">
-            {data.data.map(dataItem => {
-              return(
-                <Col key={dataItem.topic}> 
-                  <DataCard key={dataItem.topic}
-                      topic={dataItem.topic}
-                      dataName={TOPICS[dataItem.topic].name}
-                      value={dataItem.value + (units[dataItem.unit])}
-                      info={TOPICS[dataItem.topic].info}
-                      extraInfo={dataItem.extraInfo}
-                    />
-                </Col>
-              )
-            })}
-            </Row>
-            <Row className="my-3">
-              <Stack direction="horizontal" gap={1} style={{marginLeft:'5px'}}><BsGithub size="1.2em"/> Check it out on <a href="https://github.com/ekelhala/pico-weather" target="_blank">Github</a>!</Stack>
-            </Row>
-          </Container>
+          <WeatherTab topics={TOPICS} units={units} data={data}/>
         </Tab>
         <Tab eventKey="device" title="Device">
-          <Container fluid>
-          <Row className="my-2">
-          <Col>
-          <Card>
-            <Card.Header>This Station</Card.Header>
-              <Card.Body>
-                <ul style={{listStyle:'none', display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                  <li>
-                    <Stack gap={2} direction="horizontal">
-                      <BsGeoAlt size="1.2em"/> 
-                       {process.env.NEXT_PUBLIC_STATION_LOCATION ? process.env.NEXT_PUBLIC_STATION_LOCATION : "Not specified"}
-                    </Stack>
-                  </li>
-                  <li>
-                    <Stack gap={2} direction="horizontal">
-                      <BsCpu size="1.2em"/> 
-                       {process.env.NEXT_PUBLIC_STATION_HARDWARE ? process.env.NEXT_PUBLIC_STATION_HARDWARE : "Not specified"}
-                    </Stack>
-                  </li>
-                  <li>
-                    <Stack gap={2} direction="horizontal">
-                        <BsAt size="1.2em"/>
-                       {process.env.NEXT_PUBLIC_STATION_CONTACT ? process.env.NEXT_PUBLIC_STATION_CONTACT : "Not specified"}
-                    </Stack>
-                  </li>
-                </ul>
-              </Card.Body>  
-            </Card>
-            </Col>
-            </Row>
-            <Row xs={1} md={2} lg={2} className="my-2">
-            {deviceInfo.map(info => {
-              return(
-                <Col>
-                  <DataCard key={info.topic}
-                      topic={info.topic}
-                      dataName={TOPICS[info.topic].name}
-                      value={info.value + (units[info.unit])}
-                      info={TOPICS[info.topic].info}
-                      extraInfo={info.extraInfo}/>                
-                </Col>
-              )
-            })}
-            </Row>    
-          </Container>
+          <DeviceTab topics={TOPICS} units={units} deviceInfo={deviceInfo}/>
         </Tab>
       </Tabs>
     </>
