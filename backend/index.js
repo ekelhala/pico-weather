@@ -5,6 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const Temperature = require('./models/Temperature');
+const Humidity = require('./models/Humidity');
 
 const app = express();
 const PORT = process.env.port || 8000;
@@ -121,14 +122,24 @@ mqttClient.on("message", async (topic, payload, packet) => {
             state.lastUpdated = Date.now();
             switch(dataItem.topic) {
                 case 'sensors/temperature_out':
-                        const temp = new Temperature({timestamp: new Date(), value: Number(payload.toString())})
-                        try {
-                            await temp.save();
-                        }
-                        catch(error){
-                            console.log(error.message);
-                        }
+                    const temp = new Temperature({timestamp: new Date(), 
+                                                    value: Number(payload.toString())})
+                    try {
+                        await temp.save();
+                    }
+                    catch(error){
+                        console.log(error.message);
+                    }
                    break;
+                case 'sensors/humidity':
+                    const hum = new Humidity({timestamp: new Date(),
+                                                value: Number(payload.toString())})
+                    try {
+                        await hum.save();
+                    }
+                    catch(error) {
+                        console.log(error.message);
+                    }
                 case 'sensors/uv_index':
                     dataItem.extraInfo = getUVExtraInfo(dataItem.value)
                     break;
