@@ -25,7 +25,8 @@ function GraphCard(props) {
             show: true,
             style: {
                 colors: '#ffffff'
-            }
+            },
+            datetimeUTC: false
         }
         },
         yaxis: {
