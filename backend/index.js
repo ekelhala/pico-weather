@@ -120,15 +120,14 @@ mqttClient.on("message", async (topic, payload, packet) => {
             dataItem.value = payload.toString();
             state.lastUpdated = Date.now();
             switch(dataItem.topic) {
-                case 'sensors/temperature':
-                    try {
+                case 'sensors/temperature_out':
                         const temp = new Temperature({timestamp: new Date(), value: Number(payload.toString())})
-                        await temp.save();
-                        console.log("Temperature data saved");
-                    }
-                    catch(error) {
-                        console.log(error.message);
-                    }
+                        try {
+                            await temp.save();
+                        }
+                        catch(error){
+                            console.log(error.message);
+                        }
                    break;
                 case 'sensors/uv_index':
                     dataItem.extraInfo = getUVExtraInfo(dataItem.value)
@@ -156,6 +155,19 @@ app.get("/api/sensors/all", (req, res) => {
     })
     res.json(ret);
 })
+
+// Get 24h temperature history
+app.get("/api/history/temperature", async (req, res) => {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    try {
+        const data = await Temperature.find({timestamp: {$gt: cutoff}});
+        res.json(data);
+    }
+    catch(error) {
+        console.log(error.message);
+        res.status(500).json({error: 'Database error'})
+    }
+});
 
 app.get("/api/*", (req, res) => {
     const topicURI = req.url.slice(5);

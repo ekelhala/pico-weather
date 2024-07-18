@@ -1,8 +1,17 @@
 const mongoose = require('mongoose');
 
-const TemperatureSchema = mongoose.Schema({
+const Temperature = mongoose.Schema({
     timestamp: Date,
     value: Number
+},
+{
+toJSON: {
+    transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+    }
+}
 });
 
-module.exports = mongoose.model('Temperature', TemperatureSchema);
+module.exports = mongoose.model('Temperature', Temperature);
