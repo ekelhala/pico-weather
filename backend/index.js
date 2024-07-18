@@ -4,18 +4,19 @@ require('dotenv').config();
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+const Temperature = require('./models/Temperature');
+
 const app = express();
 const PORT = process.env.port || 8000;
 
 app.use(cors({origin:'*'}))
 
-try {
-    await mongoose.connect(process.env.MONGODB_URI);
-}
-catch(error) {
-    console.log('MongoDB connection failed');
-}
-console.log('Connected to MongoDB');
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+    console.log('Connected to MongoDB');
+})
+.catch((error) => {
+    console.log("MongoDB connection failed. Got message: %s", error.message);
+})
 
 const UNIT_CELSIUS = "celsius"
 const UNIT_PERCENT = "percent"
@@ -112,17 +113,29 @@ mqttClient.on("connect", () => {
         mqttClient.subscribe(state.data[dataIdx].topic);
     }
 })
-mqttClient.on("message", (topic, payload, packet) => {
+mqttClient.on("message", async (topic, payload, packet) => {
     for(let dataIdx in state.data) {
         let dataItem = state.data[dataIdx];
         if(dataItem.topic === topic) {
             dataItem.value = payload.toString();
             state.lastUpdated = Date.now();
-            if(dataItem.topic === 'sensors/uv_index') {
-                dataItem.extraInfo = getUVExtraInfo(dataItem.value)
-            }
-            else if(dataItem.topic === 'sensors/illuminance') {
-                dataItem.extraInfo = getIlluminanceExtraInfo(dataItem.value);
+            switch(dataItem.topic) {
+                case 'sensors/temperature':
+                    try {
+                        const temp = new Temperature({timestamp: new Date(), value: Number(payload.toString())})
+                        await temp.save();
+                        console.log("Temperature data saved");
+                    }
+                    catch(error) {
+                        console.log(error.message);
+                    }
+                   break;
+                case 'sensors/uv_index':
+                    dataItem.extraInfo = getUVExtraInfo(dataItem.value)
+                    break;
+                case 'sensors/illuminance':
+                    dataItem.extraInfo = getIlluminanceExtraInfo(dataItem.value);                    
+                    break;
             }
         }
     }
