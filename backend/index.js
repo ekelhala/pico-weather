@@ -180,6 +180,18 @@ app.get("/api/history/temperature", async (req, res) => {
     }
 });
 
+app.get("/api/history/humidity", async (req, res) => {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    try {
+        const data = await Humidity.find({timestamp: {$gt: cutoff}});
+        res.json(data);
+    }
+    catch(error) {
+        console.log(error.message);
+        res.status(500).json({error: 'Database error'})
+    }
+});
+
 app.get("/api/*", (req, res) => {
     const topicURI = req.url.slice(5);
     let found = false;
