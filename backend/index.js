@@ -2,11 +2,20 @@ const MQTT = require('mqtt');
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.port || 8000;
 
 app.use(cors({origin:'*'}))
+
+try {
+    await mongoose.connect(process.env.MONGODB_URI);
+}
+catch(error) {
+    console.log('MongoDB connection failed');
+}
+console.log('Connected to MongoDB');
 
 const UNIT_CELSIUS = "celsius"
 const UNIT_PERCENT = "percent"
