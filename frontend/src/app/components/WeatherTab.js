@@ -30,6 +30,8 @@ function WeatherTab(props) {
                   value={dataItem.value + (props.units[dataItem.unit])}
                   info={props.topics[dataItem.topic].info}
                   extraInfo={dataItem.extraInfo}
+                  temperatureHistory={props.temperatureHistory}
+                  humidityHistory={props.humidityHistory}
                 />
             </Col>
           )

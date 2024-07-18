@@ -1,6 +1,8 @@
 import ReactShowMoreText from "react-show-more-text";
 import UVIndexCard from "./UVIndexCard";
 import IlluminanceCard from "./IlluminanceCard";
+import TemperatureCard from "./GraphCard";
+import GraphCard from "./GraphCard";
 
 const { Card, CardHeader, CardTitle, CardBody, Accordion, CardFooter } = require("react-bootstrap");
 
@@ -26,6 +28,26 @@ function DataCard(props) {
             <IlluminanceCard value={props.value} 
                             extraInfo={props.extraInfo}
                             dataName={props.dataName}/>
+        )
+    }
+    else if(props.topic === 'sensors/temperature_out') {
+        return(
+            <GraphCard
+            value={props.value} 
+            extraInfo={props.extraInfo}
+            dataName={props.dataName}
+            history={props.temperatureHistory}
+                />    
+        )
+    }
+    else if(props.topic === 'sensors/humidity') {
+        return(
+            <GraphCard
+            value={props.value} 
+            extraInfo={props.extraInfo}
+            dataName={props.dataName}
+            history={props.humidityHistory}
+                />   
         )
     }
     return(

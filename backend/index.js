@@ -172,7 +172,12 @@ app.get("/api/history/temperature", async (req, res) => {
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
     try {
         const data = await Temperature.find({timestamp: {$gt: cutoff}});
-        res.json(data);
+        const out = [];
+        for(i in data) {
+            let item = data[i];
+            out.push([item.timestamp, item.value]);
+        }
+        res.json(out);
     }
     catch(error) {
         console.log(error.message);
@@ -184,7 +189,12 @@ app.get("/api/history/humidity", async (req, res) => {
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
     try {
         const data = await Humidity.find({timestamp: {$gt: cutoff}});
-        res.json(data);
+        const out = [];
+        for(i in data) {
+            let item = data[i];
+            out.push([item.timestamp, item.value]);
+        }
+        res.json(out);
     }
     catch(error) {
         console.log(error.message);

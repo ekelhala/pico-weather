@@ -11,6 +11,11 @@ export default function Home() {
   const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
   const [data, setData] = useState({data:[]})
+  const [history, setHistory] = useState({
+    temperatureHistory: null,
+    humidityHistory: null
+  })
+  
   const [deviceInfo, setDeviceInfo] = useState([]);
   const [showUpdatedToast, setShowUpdatedToast] = useState(false);
 
@@ -46,6 +51,7 @@ export default function Home() {
     const getStartData = async () => {
       await getData('sensors/all')
       await getDeviceData();
+      await getHistoryData();
     }
     getStartData();
   },[])
@@ -61,9 +67,25 @@ export default function Home() {
       setDeviceInfo([deviceData]);
   }
 
+  const getHistoryData = async () => {
+    const temperatureData = (await axios.get(`${API_URL}/history/temperature`)).data;
+    const humidityData = (await axios.get(`${API_URL}/history/humidity`)).data;
+    setHistory({
+      temperatureHistory: [{
+        name: 'Temperature',
+        data: temperatureData
+      }],
+      humidityHistory: [{
+        name: 'Humidity',
+        data: humidityData
+      }]
+    })
+  }
+
   const updateAll = async () => {
     await getData('sensors/all');
     await getDeviceData();
+    await getHistoryData();
     setShowUpdatedToast(true);
   }
 
@@ -82,7 +104,8 @@ export default function Home() {
       </Navbar>
       <Tabs defaultActiveKey="weather" className="mb-3" justify style={{position: 'sticky'}}>
         <Tab eventKey="weather" title="Weather">
-          <WeatherTab topics={TOPICS} units={units} data={data}/>
+          <WeatherTab topics={TOPICS} units={units} data={data} temperatureHistory={history.temperatureHistory}
+            humidityHistory={history.humidityHistory}/>
         </Tab>
         <Tab eventKey="device" title="Device">
           <DeviceTab topics={TOPICS} units={units} deviceInfo={deviceInfo}/>
