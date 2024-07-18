@@ -1,5 +1,5 @@
 import ReactShowMoreText from "react-show-more-text";
-const { Card, CardHeader, CardTitle, CardBody, Accordion, CardFooter } = require("react-bootstrap");
+import { Card, CardHeader, CardTitle, CardBody } from 'react-bootstrap';
 
 function ExpandCollapseButton(props) {
     return(

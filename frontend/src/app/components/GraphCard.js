@@ -1,5 +1,4 @@
-
-const { Card, CardHeader, CardTitle, CardBody } = require("react-bootstrap");
+import { Card, CardHeader, CardTitle, CardBody } from 'react-bootstrap';
 
 import Chart from 'react-apexcharts';
 

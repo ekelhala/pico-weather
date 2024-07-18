@@ -1,12 +1,7 @@
-import ReactShowMoreText from "react-show-more-text";
 import UVIndexCard from "./UVIndexCard";
 import IlluminanceCard from "./IlluminanceCard";
-import TemperatureCard from "./GraphCard";
 import GraphCard from "./GraphCard";
 import NormalCard from "./NormalCard";
-
-const { Card, CardHeader, CardTitle, CardBody, Accordion, CardFooter } = require("react-bootstrap");
-
 
 function DataCard(props) {
     switch(props.topic) {
