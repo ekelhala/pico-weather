@@ -11,7 +11,7 @@ export default function Home() {
   const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
   const [data, setData] = useState({data:[]})
-  const [history, setHistory] = useState({
+  const [historyData, setHistoryData] = useState({
     temperatureHistory: null,
     humidityHistory: null
   })
@@ -70,7 +70,7 @@ export default function Home() {
   const getHistoryData = async () => {
     const temperatureData = (await axios.get(`${API_URL}/history/temperature`)).data;
     const humidityData = (await axios.get(`${API_URL}/history/humidity`)).data;
-    setHistory({
+    setHistoryData({
       temperatureHistory: [{
         name: 'Temperature',
         data: temperatureData
@@ -104,8 +104,8 @@ export default function Home() {
       </Navbar>
       <Tabs defaultActiveKey="weather" className="mb-3" justify style={{position: 'sticky'}}>
         <Tab eventKey="weather" title="Weather">
-          <WeatherTab topics={TOPICS} units={units} data={data} temperatureHistory={history.temperatureHistory}
-            humidityHistory={history.humidityHistory}/>
+          <WeatherTab topics={TOPICS} units={units} data={data} temperatureHistory={historyData.temperatureHistory}
+            humidityHistory={historyData.humidityHistory}/>
         </Tab>
         <Tab eventKey="device" title="Device">
           <DeviceTab topics={TOPICS} units={units} deviceInfo={deviceInfo}/>

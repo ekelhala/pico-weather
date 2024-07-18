@@ -1,29 +1,49 @@
+"use client"
+import dynamic from 'next/dynamic';
 import { Card, CardHeader, CardTitle, CardBody } from 'react-bootstrap';
 
-import Chart from 'react-apexcharts';
+const ApexChart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 function GraphCard(props) {
 
     const chartOptions = {
         chart: {
             type: 'area',
-            height: 100,
             zoom: {
                 enabled: false
             },
             toolbar: {
                 show: false
             },
-            foreColor: '#ccc'
         },
         xaxis: {
             type: 'datetime',
-              lines: {
-                show: true
-              }
+            lines: {
+            show: true
+            },
+            labels: {
+            show: true,
+            style: {
+                colors: '#ffffff'
+            }
+        }
         },
         yaxis: {
-            opposite: 'true'
+            opposite: 'true',
+            title: {
+                text: props.unit,
+                rotate: 0,
+                offsetX: -2,
+                style: {
+                    color: '#ffffff'
+                }
+            },
+            labels: {
+                show: true,
+                style: {
+                    colors: '#ffffff'
+                }
+            }
         },
         dataLabels: {
             enabled: false
@@ -31,11 +51,8 @@ function GraphCard(props) {
         stroke: {
             curve: 'smooth'
         },
-        fill: {
-            opacity: 0.9
-        },
         tooltip: {
-            theme: 'dark'
+            enabled: false
         }
       };
 
@@ -48,7 +65,7 @@ function GraphCard(props) {
                     <small className="text-muted">
                         24 hour graph
                     </small>
-                    {props.history?<Chart options={chartOptions} series={props.history}/>:null}
+                    {props.history?<ApexChart width={"100%"} height={200} options={chartOptions} series={props.history} type={'area'}/>:null}
                     </div>
             </CardBody>
         </Card>
