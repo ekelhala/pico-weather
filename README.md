@@ -1,6 +1,6 @@
 # pico-weather
 
-A weather station for Pico W. It uses MQTT to send sensor data from the Pico to a server, which processes and distributes it via an API. The data can be viewed directly through the backend API, or graphically by using the provided frontend application.
+A weather station for Raspberry Pi Pico W. It uses MQTT to send sensor data from the Pico to a NodeJS server which processes, saves it to a MongoDB database, and finally distributes it via an API. The data can be viewed directly through the backend API, or graphically by using the provided frontend application. Different kinds of weather data are available currently: temperature, humidity, daylight level and UV index. One complete, working station is run by me, and it is available [here](https://picoweather.live)
 
 ## Project structure
 
@@ -17,9 +17,11 @@ A weather station for Pico W. It uses MQTT to send sensor data from the Pico to 
 
 ## Deployment
 
-You will need Docker, and docker-compose. The application can be deployed to a server by simply cloning this repository, entering the directory, and running `docker compose up`.
+If you wish do deploy a station yourself, you will need a Raspberry Pi Pico W, above mentioned sensors, a breadboard, and some jumpers. For the software you will need Docker, docker-compose and a MongoDB instance. The software parts of the application can be deployed to a server by simply cloning this repository, entering the directory, and running `docker compose up`.
 
-MQTT Broker is not included in the deployment, so it needs to be set up separately. [mosquitto](https://mosquitto.org/) is a good choice for this. The address, port and credentials for the server need to be also included to the environment variable files in `backend/.env` and `pico/config/env.h`
+MQTT Broker is not included in the deployment either, so it needs to be set up separately. [mosquitto](https://mosquitto.org/) is a good choice for this. The address, port and credentials for the server need to be also included to the environment variable files in `backend/.env` and `pico/config/env.h`
+
+To install the software on Pico, the sensors need to be wired to the default I2C pins, and power can be provided from the `GND` and `3v3` pins.
 
 **Tip!**
 
