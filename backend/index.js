@@ -6,6 +6,10 @@ const mongoose = require('mongoose');
 
 const Temperature = require('./models/Temperature');
 const Humidity = require('./models/Humidity');
+const UVIndex = require('./models/UVIndex');
+const Illuminance = require('./models/Illuminance');
+
+const api = require('./api/api');
 
 const app = express();
 const PORT = process.env.port || 8000;
@@ -66,45 +70,6 @@ const mqttOptions = {
     password: process.env.MQTT_PASSWORD
 }
 
-const uvExtraInfos = {
-    low: ['Low', 'green'],
-    moderate: ['Moderate', 'yellow'],
-    high: ['High', 'orange'],
-    veryHigh: ['Very high', 'red'],
-    extreme: ['Extreme', 'violet']
-}
-
-const illuminanceExtraInfos = {
-    dark: ['Dark'],
-    lowLight: ['Low light'],
-    overcast: ['Overcast'],
-    daylight: ['Daylight'],
-    bright: ['Bright']
-}
-
-const getUVExtraInfo = (uvValue) => {
-    if(uvValue <= 2)
-        return uvExtraInfos.low;
-    else if(uvValue <= 5)
-        return uvExtraInfos.moderate;    
-    else if(uvValue <= 7)
-        return uvExtraInfos.high;
-    else if(uvValue <= 10)
-        return uvExtraInfos.veryHigh;
-    return uvExtraInfos.extreme;
-}
-
-const getIlluminanceExtraInfo = (illuminanceValue) => {
-    if(illuminanceValue <= 500)
-        return illuminanceExtraInfos.dark;
-    else if(illuminanceValue <= 5380)
-        return illuminanceExtraInfos.lowLight;
-    else if(illuminanceValue <= 21520)
-        return illuminanceExtraInfos.overcast;
-    else if(illuminanceValue <= 43050)
-        return illuminanceExtraInfos.daylight;
-    return illuminanceExtraInfos.bright;
-}
 
 const mqttClient = MQTT.connect(mqttOptions);
 mqttClient.on("connect", () => {
@@ -115,41 +80,39 @@ mqttClient.on("connect", () => {
     }
 })
 mqttClient.on("message", async (topic, payload, packet) => {
-    for(let dataIdx in state.data) {
-        let dataItem = state.data[dataIdx];
-        if(dataItem.topic === topic) {
-            dataItem.value = payload.toString();
-            state.lastUpdated = Date.now();
-            switch(dataItem.topic) {
-                case 'sensors/temperature_out':
-                    const temp = new Temperature({timestamp: new Date(), 
-                                                    value: Number(payload.toString())})
-                    try {
-                        await temp.save();
-                    }
-                    catch(error){
-                        console.log(error.message);
-                    }
-                   break;
-                case 'sensors/humidity':
-                    const hum = new Humidity({timestamp: new Date(),
-                                                value: Number(payload.toString())})
-                    try {
-                        await hum.save();
-                    }
-                    catch(error) {
-                        console.log(error.message);
-                    }
-                case 'sensors/uv_index':
-                    dataItem.extraInfo = getUVExtraInfo(dataItem.value)
-                    break;
-                case 'sensors/illuminance':
-                    dataItem.extraInfo = getIlluminanceExtraInfo(dataItem.value);                    
-                    break;
-            }
+    saveToDatabase(topic, payload.toString());
+})
+
+const saveToDatabase = async (topic, valueToSave) => {
+    try{
+        const data = {
+            timestamp: new Date(),
+            value: valueToSave
+        }
+        switch(topic) {
+            case 'sensors/temperature_out':
+                await new Temperature(data).save();
+               break;
+            case 'sensors/humidity':
+                await new Humidity(data).save();
+                break;
+            case 'sensors/uv_index':
+                await new UVIndex(data).save();
+                break;
+            case 'sensors/illuminance':
+                await new Illuminance(data).save();
+                break;
+            case 'device/temperature':
+
+                break;
         }
     }
-})
+    catch(error) {
+        console.log(error.message);
+    }
+}
+
+app.use('/api', api);
 
 app.get("/api/all", (req, res) =>  {
     res.json(state);
