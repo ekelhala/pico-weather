@@ -1,6 +1,8 @@
 # pico-weather
 
-A weather station for Raspberry Pi Pico W. It uses MQTT to send sensor data from the Pico to a NodeJS server which processes, saves it to a MongoDB database, and finally distributes it via an API. The data can be viewed directly through the backend API, or graphically by using the provided frontend application. Different kinds of weather data are available currently: temperature, humidity, daylight level and UV index. One complete, working station is run by me, and it is available [here](https://picoweather.live)
+A weather station for Raspberry Pi Pico W. It uses MQTT to send sensor data from the Pico to a Express server which processes it, saves it to a MongoDB database, and finally distributes it via an API. The data can be viewed directly through the backend API, or graphically by using the provided frontend application. Different kinds of weather data are available currently: temperature, humidity, daylight intensity level and UV index. 24-hour historical charts for temperature and humidity are also provided in the UI currently.
+
+One complete, working station is run by me, and it is available [here](https://picoweather.live)
 
 ## Project structure
 
