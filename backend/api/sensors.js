@@ -22,6 +22,16 @@ const illuminanceExtraInfos = {
     bright: ['Bright']
 }
 
+const TOPIC_TEMPERATURE = 'sensors/temperature'
+const TOPIC_HUMIDITY = 'sensors/humidity'
+const TOPIC_UVI = 'sensors/uv_index'
+const TOPIC_ILLUMINANCE = 'sensors/illuminance'
+
+const UNIT_CELSIUS = "celsius"
+const UNIT_PERCENT = "percent"
+const UNIT_NONE = "none"
+const UNIT_LUX = "lux"
+
 const getUVExtraInfo = (uvValue) => {
     if(uvValue <= 2)
         return uvExtraInfos.low;
@@ -50,21 +60,39 @@ router.get('/all', async (req, res) => {
     const latestTemperature = await Temperature.findOne().sort({$natural: -1})
     const lastUpdated = latestTemperature.timestamp;
     const latestHumidity = await Humidity.findOne().sort({$natural: -1})
-    let latestIlluminance = await Illuminance.findOne().sort({$natural: -1})
-    let latestUVIndex = await UVIndex.findOne().sort({$natural: -1})
-
-    latestIlluminance.extraInfo = getIlluminanceExtraInfo(latestIlluminance.value);
-    latestUVIndex.extraInfo = getUVExtraInfo(latestUVIndex.value);
+    const latestIlluminance = await Illuminance.findOne().sort({$natural: -1})
+    const latestUVIndex = await UVIndex.findOne().sort({$natural: -1})
 
     res.json({
         lastUpdated,
         data: [
-            latestTemperature,
-            latestHumidity,
-            latestIlluminance,
-            latestUVIndex
+            {
+                topic: TOPIC_TEMPERATURE,
+                unit: UNIT_CELSIUS,
+                value: latestTemperature.value,
+                extraInfo: []
+            },
+            {
+                topic: TOPIC_ILLUMINANCE,
+                unit: UNIT_LUX,
+                value: latestIlluminance.value,
+                extraInfo: getIlluminanceExtraInfo(latestIlluminance.value)
+            },
+            {
+                topic: TOPIC_HUMIDITY,
+                unit: UNIT_PERCENT,
+                value: latestHumidity.value,
+                extraInfo: []
+            },
+            {
+                topic: TOPIC_UVI,
+                unit: UNIT_NONE,
+                value: latestUVIndex.value,
+                extraInfo: getUVExtraInfo(latestUVIndex.value)
+            }
         ]
     })
 });
+
 
 module.exports = router;
