@@ -42,6 +42,6 @@ float ltr390_convert_als(int32_t als_data) {
 
 float ltr390_convert_uvs(int32_t uvs_data) {
     // https://community.home-assistant.io/t/uv-index-with-ltr390-uv-sensor/461305/5
-    return (uvs_data / 95.83);
+    return (uvs_data / 95.83) * 3.91;
 }
 
