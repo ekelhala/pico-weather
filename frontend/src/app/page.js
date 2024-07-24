@@ -11,10 +11,6 @@ export default function Home() {
   const API_URL = (process.env.NODE_ENV==='production' ? '/api' : 'http://localhost:8000/api')
 
   const [data, setData] = useState({data:[]})
-  const [historyData, setHistoryData] = useState({
-    temperatureHistory: null,
-    humidityHistory: null
-  })
   
   const [showUpdatedToast, setShowUpdatedToast] = useState(false);
 
@@ -49,7 +45,7 @@ export default function Home() {
   useEffect(() => {
     const getStartData = async () => {
       await getData('sensors/all')
-      await getHistoryData();
+      //await getHistoryData();
     }
     getStartData();
   },[])
@@ -59,38 +55,8 @@ export default function Home() {
     setData(freshData);
   }
 
-  const getDeviceData = async () => {
-      const deviceData = (await axios.get(`${API_URL}/device/temperature`)).data;
-      // Remember to change here if there is more device data in the future!
-      setDeviceInfo([deviceData]);
-  }
-
-  const getHistoryData = async () => {
-    const endDate = new Date();
-    const startDate = new Date(new Date().getTime() - (24 * 60 * 60 *1000));
-    const requestParams = {
-      start: startDate,
-      end: endDate
-    }
-    const temperatureData = (await axios.get(`${API_URL}/history/temperature`, 
-      {params: requestParams})).data;
-    const humidityData = (await axios.get(`${API_URL}/history/humidity`, 
-      {params: requestParams})).data;
-    setHistoryData({
-      temperatureHistory: [{
-        name: 'Temperature',
-        data: temperatureData
-      }],
-      humidityHistory: [{
-        name: 'Humidity',
-        data: humidityData
-      }]
-    })
-  }
-
   const updateAll = async () => {
     await getData('sensors/all');
-    await getHistoryData();
     setShowUpdatedToast(true);
   }
 
@@ -109,8 +75,7 @@ export default function Home() {
       </Navbar>
       <Tabs defaultActiveKey="weather" className="mb-3" justify style={{position: 'sticky'}}>
         <Tab eventKey="weather" title="Weather">
-          <WeatherTab topics={TOPICS} units={units} data={data} temperatureHistory={historyData.temperatureHistory}
-            humidityHistory={historyData.humidityHistory}/>
+          <WeatherTab topics={TOPICS} units={units} data={data}/>
         </Tab>
         <Tab eventKey="device" title="Device">
           <DeviceTab/>

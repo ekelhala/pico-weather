@@ -32,6 +32,8 @@ function WeatherTab(props) {
                   extraInfo={dataItem.extraInfo}
                   temperatureHistory={props.temperatureHistory}
                   humidityHistory={props.humidityHistory}
+                  timeframe={props.timeframe}
+                  onTimeframeChange={props.onTimeframeChange}
                 />
             </Col>
           )

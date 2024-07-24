@@ -22,7 +22,8 @@ function DataCard(props) {
                 extraInfo={props.extraInfo}
                 dataName={props.dataName}
                 history={props.temperatureHistory}
-                unit={'\u00b0C'}/>)
+                unit={'\u00b0C'}
+                datasetName={'temperature'}/>)
         case 'sensors/humidity':
             return(
                 <GraphCard
@@ -30,7 +31,8 @@ function DataCard(props) {
                 extraInfo={props.extraInfo}
                 dataName={props.dataName}
                 history={props.humidityHistory}
-                unit={'%'}/>)
+                unit={'%'}
+                datasetName={'humidity'}/>)
         default:
             return(
                 <NormalCard
