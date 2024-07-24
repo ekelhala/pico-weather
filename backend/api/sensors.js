@@ -22,7 +22,7 @@ const illuminanceExtraInfos = {
     bright: ['Bright']
 }
 
-const TOPIC_TEMPERATURE = 'sensors/temperature'
+const TOPIC_TEMPERATURE = 'sensors/temperature_out'
 const TOPIC_HUMIDITY = 'sensors/humidity'
 const TOPIC_UVI = 'sensors/uv_index'
 const TOPIC_ILLUMINANCE = 'sensors/illuminance'

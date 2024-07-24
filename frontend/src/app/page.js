@@ -16,7 +16,6 @@ export default function Home() {
     humidityHistory: null
   })
   
-  const [deviceInfo, setDeviceInfo] = useState([]);
   const [showUpdatedToast, setShowUpdatedToast] = useState(false);
 
   const TOPICS = {'device/temperature': {
@@ -50,7 +49,6 @@ export default function Home() {
   useEffect(() => {
     const getStartData = async () => {
       await getData('sensors/all')
-      await getDeviceData();
       await getHistoryData();
     }
     getStartData();
@@ -68,8 +66,16 @@ export default function Home() {
   }
 
   const getHistoryData = async () => {
-    const temperatureData = (await axios.get(`${API_URL}/history/temperature`)).data;
-    const humidityData = (await axios.get(`${API_URL}/history/humidity`)).data;
+    const endDate = new Date();
+    const startDate = new Date(new Date().getTime() - (24 * 60 * 60 *1000));
+    const requestParams = {
+      start: startDate,
+      end: endDate
+    }
+    const temperatureData = (await axios.get(`${API_URL}/history/temperature`, 
+      {params: requestParams})).data;
+    const humidityData = (await axios.get(`${API_URL}/history/humidity`, 
+      {params: requestParams})).data;
     setHistoryData({
       temperatureHistory: [{
         name: 'Temperature',
@@ -84,7 +90,6 @@ export default function Home() {
 
   const updateAll = async () => {
     await getData('sensors/all');
-    await getDeviceData();
     await getHistoryData();
     setShowUpdatedToast(true);
   }
@@ -108,7 +113,7 @@ export default function Home() {
             humidityHistory={historyData.humidityHistory}/>
         </Tab>
         <Tab eventKey="device" title="Device">
-          <DeviceTab topics={TOPICS} units={units} deviceInfo={deviceInfo}/>
+          <DeviceTab/>
         </Tab>
       </Tabs>
       <Toast autohide delay={2000} show={showUpdatedToast}

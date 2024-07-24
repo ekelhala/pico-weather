@@ -15,7 +15,12 @@ const makeDBQuery = (start, end) => {
 
 router.get('/temperature', async (req, res) => {
     try {
-        res.json(await Temperature.find(makeDBQuery(req.query.start, req.query.end)))
+        const data = await Temperature.find(makeDBQuery(req.query.start, req.query.end));
+        const out = []
+        for(let i in data) {
+            out.push([data[i].timestamp, data[i].value])
+        }
+        res.json(out)
     }
     catch(error) {
         res.status(400).json({error: 'Bad request'})
@@ -24,7 +29,12 @@ router.get('/temperature', async (req, res) => {
 
 router.get('/humidity', async (req, res) => {
     try {
-        res.json(await Humidity.find(makeDBQuery(req.query.start, req.query.end)))
+        const data = await Humidity.find(makeDBQuery(req.query.start, req.query.end));
+        const out = []
+        for(let i in data) {
+            out.push([data[i].timestamp, data[i].value])
+        }
+        res.json(out)
     }
     catch(error) {
         res.status(400).json({error: 'Bad request'})
