@@ -1,6 +1,6 @@
 
 export const metadata = {
-  title: "Dashboard",
+  title: "Pico-Weather",
   description: "See real-time data straight from Pico weather station!",
 };
 

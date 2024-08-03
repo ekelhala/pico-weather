@@ -73,16 +73,16 @@ router.get('/all', async (req, res) => {
                 extraInfo: []
             },
             {
-                topic: TOPIC_ILLUMINANCE,
-                unit: UNIT_LUX,
-                value: latestIlluminance.value,
-                extraInfo: getIlluminanceExtraInfo(latestIlluminance.value)
-            },
-            {
                 topic: TOPIC_HUMIDITY,
                 unit: UNIT_PERCENT,
                 value: latestHumidity.value,
                 extraInfo: []
+            },
+            {
+                topic: TOPIC_ILLUMINANCE,
+                unit: UNIT_LUX,
+                value: latestIlluminance.value,
+                extraInfo: getIlluminanceExtraInfo(latestIlluminance.value)
             },
             {
                 topic: TOPIC_UVI,

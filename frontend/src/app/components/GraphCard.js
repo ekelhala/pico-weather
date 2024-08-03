@@ -112,9 +112,6 @@ function GraphCard(props) {
                     </div>
                 </CardTitle>
                     <div>
-                    <small className="text-muted">
-                        24 hour graph
-                    </small>
                     {history?<ApexChart width={"100%"} height={200} options={chartOptions} series={history} type={'area'}/>:null}
                     </div>
             </CardBody>
